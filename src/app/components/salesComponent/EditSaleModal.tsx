@@ -34,7 +34,7 @@ export default function EditSaleModal({ open, onClose, products, saleId, onSaleU
 
   const discountAmount = watch("discount_amount") || 0;
 
-  // ✅ Add this useMemo
+  // Add this useMemo
   const calculatedTotals = useMemo(() => {
     let subtotal = 0;
     
@@ -86,11 +86,11 @@ export default function EditSaleModal({ open, onClose, products, saleId, onSaleU
 
       if (res.ok) {
         const data = await res.json();
-        const sale = data.find((s: any) => s.id === saleId);
+        const sale = data.find((s: { id: number }) => s.id === saleId);
 
         if (sale) {
           const productIdMap: Record<number, string> = {};
-          const formItems = sale.items.map((item: any, index: number) => {
+          const formItems = sale.items.map((item: { product_name: string; quantity: number; unit_price: number }, index: number) => {
             const product = products.find(p => p.name === item.product_name);
             if (product) {
               productIdMap[index] = product.id.toString();
@@ -193,10 +193,10 @@ export default function EditSaleModal({ open, onClose, products, saleId, onSaleU
     });
 
     setSelectedProductIds(newSelectedIds);
-    setValue("items", currentItems.filter((_: any, i: number) => i !== index));
+    setValue("items", currentItems.filter((_: unknown, i: number) => i !== index));
   }
 
-  async function onSubmit(data: any) {
+  async function onSubmit(data: unknown) {
     const hasEmptyProducts = Object.keys(selectedProductIds).length !== items.length;
     if (hasEmptyProducts) {
       showError("Please select a product for all items");
@@ -204,10 +204,10 @@ export default function EditSaleModal({ open, onClose, products, saleId, onSaleU
     }
 
     const payload = {
-      customer_name: data.customer_name || "Walk-in Customer",
-      payment_method: data.payment_method,
+      customer_name: (data as { customer_name?: string }).customer_name || "Walk-in Customer",
+      payment_method: (data as { payment_method?: string }).payment_method,
       amount_paid: 0,
-      items: items.map((it: any, idx: number) => {
+      items: items.map((it: { product: string; quantity: number; price: number }, idx: number) => {
         const productId = selectedProductIds[idx];
         const product = products.find(p => p.id.toString() === productId);
         return {
@@ -238,7 +238,7 @@ export default function EditSaleModal({ open, onClose, products, saleId, onSaleU
         const errorDetails: string[] = [];
 
         if (err.items && Array.isArray(err.items)) {
-          err.items.forEach((itemError: any, index: number) => {
+          err.items.forEach((itemError: { product: string[] | string }, index: number) => {
             if (itemError.product && Array.isArray(itemError.product)) {
               errorDetails.push(`Item ${index + 1}: ${itemError.product[0]}`);
             } else if (itemError.product) {
@@ -312,7 +312,7 @@ export default function EditSaleModal({ open, onClose, products, saleId, onSaleU
               <div className="col-span-1">Actions</div>
             </div>
 
-            {items.map((_: any, idx: number) => {
+            {items.map((_: { product: string; quantity: number; price: number }, idx: number) => {
               const selectedProductId = selectedProductIds[idx];
               const filteredProducts = getFilteredProducts(idx);
               

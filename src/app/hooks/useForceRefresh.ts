@@ -5,7 +5,7 @@ import { clearCacheByEndpoint, clearRelatedCaches } from '@/services/api';
 export function useForceRefresh() {
   const forceRefresh = useCallback(async (
     endpoints: string[],
-    fetchFunctions: (() => Promise<any>)[]
+    fetchFunctions: (() => Promise<unknown>)[]
   ) => {
     // Step 1: Clear all related caches
     endpoints.forEach(endpoint => {
@@ -19,10 +19,10 @@ export function useForceRefresh() {
     // Step 3: Execute all fetch functions in parallel
     try {
       await Promise.all(fetchFunctions.map(fn => fn()));
-      console.log('✅ Force refresh completed');
+      console.log(' Force refresh completed');
       return true;
     } catch (error) {
-      console.error('❌ Force refresh failed:', error);
+      console.error(' Force refresh failed:', error);
       return false;
     }
   }, []);

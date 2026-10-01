@@ -1,8 +1,8 @@
-// FILE 1: EditPOModal.tsx
-// Path: src/app/components/purchaseOrders/EditPOModal.tsx
+// EditPOModal.tsx
+// src/app/components/purchaseOrders/EditPOModal.tsx
 
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { X, Package, Plus, Trash2 } from "lucide-react";
 import { PurchaseOrder, Product } from "@/app/types";
 import { showSuccess, showError } from "@/app/utils/toast";
@@ -47,13 +47,13 @@ export default function EditPOModal({ open, onClose, po, products, onPOUpdated }
     }));
   };
 
-  const updateItem = (index: number, field: string, value: any) => {
+  const updateItem = (index: number, field: string, value: unknown) => {
     const newItems = [...formData.items];
     newItems[index] = { ...newItems[index], [field]: value };
     setFormData(prev => ({ ...prev, items: newItems }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     if (formData.items.length === 0) {
@@ -258,7 +258,7 @@ export default function EditPOModal({ open, onClose, po, products, onPOUpdated }
             Cancel
           </button>
           <button
-            onClick={(e: any) => handleSubmit(e)}
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>)}
             disabled={submitting}
             className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >

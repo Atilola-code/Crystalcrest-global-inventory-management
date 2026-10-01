@@ -25,7 +25,7 @@ export default function SalesModal({ open, onClose, products, onSaleCompleted, i
     }
   });
   
-  // ✅ FIX: Watch all form values for real-time calculation
+  // FIX: Watch all form values for real-time calculation
   const items = watch("items") || [];
   const discountAmount = watch("discount_amount") || 0;
   
@@ -61,7 +61,7 @@ export default function SalesModal({ open, onClose, products, onSaleCompleted, i
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [dropdownOpen]);
 
-  // ✅ FIX: REAL-TIME TOTALS CALCULATION - Recalculates whenever items, quantities, or discount changes
+  //  REAL-TIME TOTALS CALCULATION - Recalculates whenever items, quantities, or discount changes
   const calculatedTotals = useMemo(() => {
     let subtotal = 0;
     
@@ -160,7 +160,7 @@ export default function SalesModal({ open, onClose, products, onSaleCompleted, i
     setValue("items", currentItems.filter((_: any, i: number) => i !== index));
   }
 
-  async function onSubmit(data: any) {
+  async function onSubmit(data: { customer_name?: string; payment_method?: string; discount_amount?: string | number; items: { product: string; quantity: number; price: number }[] }) {
     const hasEmptyProducts = Object.keys(selectedProductIds).length !== items.length;
     if (hasEmptyProducts) {
       showError("Please select a product for all items");
@@ -170,7 +170,7 @@ export default function SalesModal({ open, onClose, products, onSaleCompleted, i
     setSubmitting(true);
 
     try {
-      const saleItems = items.map((it: any, index: number) => {
+      const saleItems = items.map((it: { product: string; quantity: number; price: number }, index: number) => {
         const productId = selectedProductIds[index];
         const product = products.find(p => p.id.toString() === productId);
         
@@ -189,7 +189,7 @@ export default function SalesModal({ open, onClose, products, onSaleCompleted, i
         customer_name: data.customer_name || "Walk-in Customer",
         payment_method: data.payment_method,
         amount_paid: 0,
-        discount_amount: parseFloat(data.discount_amount) || 0,
+        discount_amount: Number(data.discount_amount ?? 0),
         items: saleItems
       };
 
@@ -204,9 +204,14 @@ export default function SalesModal({ open, onClose, products, onSaleCompleted, i
         const err = await res.json();
         
         if (err.items) {
-          const itemErrors = Object.entries(err.items)
-            .map(([key, value]: [string, any]) => {
-              return `${key}: ${Array.isArray(value) ? value[0] : value}`;
+          const itemErrors = Object.entries(err.items as Record<string, unknown>)
+            .map(([key, value]) => {
+              const message = Array.isArray(value)
+                ? value[0]
+                : typeof value === "string"
+                  ? value
+                  : JSON.stringify(value);
+              return `${key}: ${message}`;
             })
             .join('; ');
           showError(`Item errors: ${itemErrors}`);
@@ -236,9 +241,9 @@ export default function SalesModal({ open, onClose, products, onSaleCompleted, i
       setSearchTerms({});
       onSaleCompleted(sale);
       onClose();
-    } catch (err: any) {
-      console.error("❌ Error recording sale:", err);
-      showError(err.message || "Sales record failed. Please check your connection and try again.");
+    } catch (err: unknown) {
+      console.error(" Error recording sale:", err);
+      showError((err as Error).message || "Sales record failed. Please check your connection and try again.");
     } finally {
       setSubmitting(false);
     }
@@ -300,7 +305,7 @@ export default function SalesModal({ open, onClose, products, onSaleCompleted, i
                   <div className="col-span-1">Actions</div>
                 </div>
 
-                {items.map((_: any, idx: number) => {
+                {items.map((_: { product: string; quantity: number; price: number }, idx: number) => {
                   const selectedProductId = selectedProductIds[idx];
                   const filteredProducts = getFilteredProducts(idx);
                   

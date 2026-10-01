@@ -43,7 +43,7 @@ export default function EditProductModal({ open, onClose, product, onProductUpda
     if (!product) return;
 
     try {
-      const token = localStorage.getItem("access_token");
+      // const token = localStorage.getItem("access_token");
       const res = await apiFetch(`/api/inventory/${product.id}/`, {
         method: "PATCH",
         

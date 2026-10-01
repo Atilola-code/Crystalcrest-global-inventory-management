@@ -10,7 +10,7 @@ import { showError, showSuccess } from "../utils/toast";
 import { apiFetch } from "@/services/api";
 
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+// const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 type UserRole = 'ADMIN' | 'MANAGER' | 'CASHIER';
 
@@ -128,7 +128,7 @@ export default function UserManagementPage() {
   const [loading, setLoading] = useState(false);
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<number | null>(null);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [_editingUser, setEditingUser] = useState<User | null>(null);
   const [confirmationModal, setConfirmationModal] = useState<{
     isOpen: boolean;
     userId: number | null;
@@ -165,24 +165,24 @@ export default function UserManagementPage() {
     fetchUsers();
   }, []);
 
-  async function validateToken(): Promise<boolean> {
-  const token = localStorage.getItem("access_token");
-  if (!token) return false;
+//   async function validateToken(): Promise<boolean> {
+//   const token = localStorage.getItem("access_token");
+//   if (!token) return false;
   
-  try {
-    const res = await fetch(`${API_URL}/api/users/`, {
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
-    });
+//   try {
+//     const res = await fetch(`${API_URL}/api/users/`, {
+//       headers: {
+//         "Authorization": `Bearer ${token}`,
+//         "Content-Type": "application/json"
+//       },
+//     });
     
-    // If we get anything other than 401, token is valid
-    return res.status !== 401;
-  } catch {
-    return false;
-  }
-}
+//     // If we get anything other than 401, token is valid
+//     return res.status !== 401;
+//   } catch {
+//     return false;
+//   }
+// }
 
   async function fetchUsers() {
     setLoading(true);
@@ -240,9 +240,9 @@ export default function UserManagementPage() {
     fetchUsers(); // Refresh the user list
   }
 
-  const handleDeleteUser = async (userId: number) => {
-    // No need for confirmation here, it's handled by the modal
-  };
+  // const handleDeleteUser = async (userId: number) => {
+  //   // No need for confirmation here, it's handled by the modal
+  // };
 
   // New function to handle delete confirmation
   const handleDeleteConfirmation = (userId: number, userName: string) => {
@@ -260,7 +260,7 @@ export default function UserManagementPage() {
     if (!userId) return;
 
     try {
-      const token = localStorage.getItem("access_token");
+      // const token = localStorage.getItem("access_token");
       const res = await apiFetch(`/api/users/${userId}/`, {
         method: "DELETE",
       });

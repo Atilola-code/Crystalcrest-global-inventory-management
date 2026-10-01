@@ -128,9 +128,9 @@ export default function ClearCreditModal({ open, onClose, credit, onCreditCleare
         const errorData = await response.json();
         showError(errorData.detail || errorData.message || `Failed to record payment (Status: ${response.status})`);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Network error recording payment:", error);
-      showError(`Network error: ${error.message || "Failed to connect to server"}`);
+      showError(`Network error: ${ (error as Error).message || "Failed to connect to server" }`);
     } finally {
       setLoading(false);
     }

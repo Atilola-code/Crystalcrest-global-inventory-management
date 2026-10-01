@@ -4,17 +4,12 @@ import CreditHistoryModal from "../components/outstandingComponent/CreditHistory
 import { 
   ChevronRight, 
   Calendar, 
-  DollarSign, 
   FileText, 
   MoreVertical, 
-  Eye, 
   CheckCircle,
   AlertCircle,
-  CreditCard,
   TrendingUp,
   TrendingDown,
-  Plus,
-  Filter,
   Download,
   RefreshCw,
   Printer,
@@ -24,8 +19,8 @@ import ProtectedRoute from "../components/auth/ProtectedRoute";
 import Sidebar from "../components/layout/Sidebar";
 import Topbar from "../components/layout/Topbar";
 import ClearCreditModal from "../components/outstandingComponent/ClearCreditModal";
-import { Credit, UserRole } from "../types";
-import { useAuth } from "@/contexts/AuthContext";
+import { Credit } from "../types";
+// import { useAuth } from "@/contexts/AuthContext";
 import { showSuccess, showError } from "@/app/utils/toast";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -43,7 +38,7 @@ type DailyCredits = {
 };
 
 export default function OutstandingPage() {
-  const { user } = useAuth();
+  // const { user } = useAuth();
   const [query, setQuery] = useState("");
   const [dailyCredits, setDailyCredits] = useState<DailyCredits[]>([]);
   const [loading, setLoading] = useState(false);
@@ -60,7 +55,7 @@ export default function OutstandingPage() {
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [selectedCreditForHistory, setSelectedCreditForHistory] = useState<Credit | null>(null);
 
-  const userRole = user?.role as UserRole | null;
+  // const userRole = user?.role as UserRole | null;
 
   const syncDashboardManually = async () => {
     setSyncingDashboard(true);
@@ -121,8 +116,6 @@ export default function OutstandingPage() {
             sum + (Number(credit.amount_paid) || 0), 0
           );
           
-          console.log('Total outstanding from all credits:', outstanding);
-          console.log('Total cleared from all credits:', cleared);
           
           setTotalOutstandingAmount(outstanding);
           setTotalClearedAmount(cleared);
@@ -214,7 +207,7 @@ export default function OutstandingPage() {
 
   async function handleMarkAsCleared(credit: Credit) {
     try {
-      const token = localStorage.getItem("access_token");
+      // const token = localStorage.getItem("access_token");
       const response = await apiFetch(`/api/sales/credits/${credit.id}/clear/`, {
         method: "POST",
         body: JSON.stringify({
@@ -379,8 +372,8 @@ export default function OutstandingPage() {
   );
 
   // Calculate totals for display
-  const totalOutstanding = dailyCredits.reduce((sum, d) => sum + d.totalOutstanding, 0);
-  const totalCleared = dailyCredits.reduce((sum, d) => sum + d.totalCleared, 0);
+  // const totalOutstanding = dailyCredits.reduce((sum, d) => sum + d.totalOutstanding, 0);
+  // const totalCleared = dailyCredits.reduce((sum, d) => sum + d.totalCleared, 0);
   const totalCredits = dailyCredits.reduce((sum, d) => sum + d.creditsCount, 0);
   const totalClearedCount = dailyCredits.reduce((sum, d) => sum + d.clearedCount, 0);
 
@@ -405,12 +398,12 @@ export default function OutstandingPage() {
   };
 
   // Helper function to format numbers without currency symbol
-  const formatNumber = (num: number) => {
-    return num.toLocaleString('en-NG', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    });
-  };
+  // const formatNumber = (num: number) => {
+  //   return num.toLocaleString('en-NG', {
+  //     minimumFractionDigits: 0,
+  //     maximumFractionDigits: 0
+  //   });
+  // };
 
   
   const getStatusBadge = (status: string) => {

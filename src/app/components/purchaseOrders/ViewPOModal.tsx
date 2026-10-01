@@ -56,12 +56,12 @@ export default function ViewPOModal({ open, onClose, po }: ViewPOModalProps) {
     );
   };
 
-  // ✅ PRINT FUNCTION
+  //  PRINT FUNCTION
   const handlePrint = () => {
     window.print();
   };
 
-  // ✅ EXPORT TO PDF FUNCTION
+  //  EXPORT TO PDF FUNCTION
   const handleExportPDF = () => {
     const doc = new jsPDF();
     
@@ -94,7 +94,7 @@ export default function ViewPOModal({ open, onClose, po }: ViewPOModalProps) {
     });
     
     // Add totals
-    const finalY = (doc as any).lastAutoTable.finalY || 60;
+    const finalY = (doc as typeof doc & { lastAutoTable?: { finalY?: number } }).lastAutoTable?.finalY ?? 60;
     doc.text(`Total Amount: ₦${formatCurrency(po.total_amount)}`, 14, finalY + 10);
     doc.text(`Stock Value: ₦${formatCurrency(po.stock_value)}`, 14, finalY + 16);
     
@@ -103,7 +103,7 @@ export default function ViewPOModal({ open, onClose, po }: ViewPOModalProps) {
 
   return (
     <>
-      {/* ✅ PRINT STYLES */}
+      {/* PRINT STYLES */}
       <style jsx global>{`
         @media print {
           body * {
@@ -324,4 +324,4 @@ export default function ViewPOModal({ open, onClose, po }: ViewPOModalProps) {
       </div>
     </>
   );
-}``
+}

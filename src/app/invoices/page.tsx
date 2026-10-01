@@ -19,7 +19,7 @@ import Sidebar from "../components/layout/Sidebar";
 import Topbar from "../components/layout/Topbar";
 import ReceiptView from "../components/salesComponent/ReceiptView";
 import EditSaleModal from "../components/salesComponent/EditSaleModal";
-import { Sale, Product, UserRole, Deposit } from "../types";
+import { Sale, UserRole } from "../types";
 import { useAuth } from "@/contexts/AuthContext";
 import { showSuccess, showError } from "@/app/utils/toast";
 import {
@@ -92,20 +92,28 @@ export default function InvoicesPage() {
       addEntry(label, d);
       map[label].sales.push(sale);
       map[label].salesCount += 1;
-      map[label].totalAmount += parseFloat(sale.total_amount as any) || 0;
+      map[label].totalAmount += Number(sale.total_amount) || 0;
     }
 
-    for (const dep of deposits as any[]) {
+    for (const dep of deposits as { id: string; depositor_name: string; bank_name: string; amount: number; date: string }[]) {
       const d = new Date(dep.date);
       const label = d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
       addEntry(label, d);
       map[label].deposits.push(dep);
       map[label].depositsCount += 1;
-      map[label].totalDeposits += parseFloat(dep.amount) || 0;
+      map[label].totalDeposits += Number(dep.amount) || 0;
     }
 
-    for (const u of unsuppliedAll as any[]) {
-      const d = new Date(u.created_at || u.date);
+    for (const u of unsuppliedAll as {
+      id: string;
+      customer_name: string;
+      items: { product_name: string; quantity: number }[];
+      notes: string;
+      status: string;
+      created_at?: string;
+      date?: string;
+    }[]) {
+      const d = new Date(u.created_at || u.date || "");
       const label = d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
       addEntry(label, d);
       map[label].unsupplied.push(u);
@@ -126,7 +134,7 @@ export default function InvoicesPage() {
   const paymentTotals = selectedDay
     ? selectedDay.sales.reduce(
         (acc, s) => {
-          const amt = parseFloat(s.total_amount as any) || 0;
+          const amt = Number(s.total_amount) || 0;
           if (s.payment_method === "cash") { acc.cash += amt; acc.cashCount += 1; }
           else if (s.payment_method === "transfer") { acc.transfer += amt; acc.transferCount += 1; }
           else if (s.payment_method === "pos") { acc.pos += amt; acc.posCount += 1; }
@@ -147,27 +155,28 @@ export default function InvoicesPage() {
   }
 
   const formatCurrency = (v: number | string | undefined) => {
-    const n = typeof v === "number" ? v : parseFloat(v as string) || 0;
+    const n = typeof v === "number" ? v : Number(v) || 0;
     return new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", minimumFractionDigits: 0, maximumFractionDigits: 0 })
       .format(isNaN(n) ? 0 : n)
       .replace("NGN", "₦")
       .trim();
   };
 
-  async function handleMarkSupplied(id: number) {
+  async function handleMarkSupplied(id: string | number) {
     try {
-      await markSuppliedMutation.mutateAsync(id);
+      const numericId = Number(id);
+      await markSuppliedMutation.mutateAsync(numericId);
       showSuccess("Marked as supplied!");
       queryClient.invalidateQueries({ queryKey: queryKeys.unsupplied });
-    } catch (err: any) {
-      showError(err.message || "Failed");
+    } catch (err: unknown) {
+      showError((err as Error)  .message || "Failed");
     }
   }
 
   // ─── Totals for summary cards ──────────────────────────────────────────────
   const grandTotalSales = dailySales.reduce((s, d) => s + d.totalAmount, 0);
   const grandTotalDeposits = dailySales.reduce((s, d) => s + d.totalDeposits, 0);
-  const totalPendingUnsupplied = (unsuppliedAll as any[]).filter((u) => u.status === "pending").length;
+  const totalPendingUnsupplied = (unsuppliedAll as { status: string }[]).filter((u) => u.status === "pending").length;
 
   return (
     <ProtectedRoute>
@@ -220,7 +229,7 @@ export default function InvoicesPage() {
                         <p className="text-xs text-amber-700 uppercase font-medium">Unsupplied Pending</p>
                         <p className="text-2xl font-bold text-amber-800 mt-1">{totalPendingUnsupplied}</p>
                         <p className="text-xs text-amber-600 mt-0.5">
-                          {(unsuppliedAll as any[]).filter((u) => u.status === "supplied").length} supplied
+                          {(unsuppliedAll as { status: string }[]).filter((u) => u.status === "supplied").length} supplied
                         </p>
                       </div>
                       <PackageX className="w-9 h-9 text-amber-500" />
@@ -382,7 +391,7 @@ export default function InvoicesPage() {
                           </tr>
                         </thead>
                         <tbody className="divide-y">
-                          {selectedDay.deposits.map((dep: any) => (
+                          {selectedDay.deposits.map((dep: { id: string; depositor_name: string; bank_name: string; amount: number; date: string }) => (
                             <tr key={dep.id} className="hover:bg-gray-50">
                               <td className="px-4 py-3 text-sm font-medium text-gray-900"><span className="inline-flex px-2 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-700 mr-2">DEPOSIT</span>DEP-{dep.id}</td>
                               <td className="px-4 py-3 text-sm text-gray-600">{dep.depositor_name}</td>
@@ -417,13 +426,13 @@ export default function InvoicesPage() {
                           </tr>
                         </thead>
                         <tbody className="divide-y">
-                          {selectedDay.unsupplied.map((u: any) => (
+                          {selectedDay.unsupplied.map((u: { id: string; customer_name: string; items: { product_name: string; quantity: number }[]; notes: string; status: string }) => (
                             <tr key={u.id} className="hover:bg-gray-50">
                               <td className="px-4 py-3 text-sm font-medium text-gray-700">#{u.id}</td>
                               <td className="px-4 py-3 text-sm font-medium text-gray-800">{u.customer_name}</td>
                               <td className="px-4 py-3 text-sm text-gray-600">
                                 <div className="flex flex-wrap gap-1">
-                                  {u.items?.map((item: any, i: number) => (
+                                  {u.items?.map((item: { product_name: string; quantity: number }, i: number) => (
                                     <span key={i} className="bg-gray-100 text-gray-700 text-xs px-2 py-0.5 rounded-full">{item.product_name} ×{item.quantity}</span>
                                   ))}
                                 </div>

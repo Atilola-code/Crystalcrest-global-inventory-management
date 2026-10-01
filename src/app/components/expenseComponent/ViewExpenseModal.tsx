@@ -1,6 +1,6 @@
 
 "use client";
-import { X, DollarSign, Calendar, User, FileText, CreditCard, Hash } from "lucide-react";
+import { X, DollarSign, Calendar, User, FileText, Hash } from "lucide-react";
 
 interface Expense {
   id: number;

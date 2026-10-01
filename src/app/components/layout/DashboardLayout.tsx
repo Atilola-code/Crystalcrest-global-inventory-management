@@ -13,7 +13,7 @@ type Props = {
   onRegisterClick?: () => void;
 };
 
-export default function DashboardLayout({ children, query, setQuery, setView, view, onRegisterClick }: Props) {
+export default function DashboardLayout({ children, query, setQuery, onRegisterClick }: Props) {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800">
       <Sidebar />

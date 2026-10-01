@@ -167,7 +167,7 @@ export default function LiveChatPage() {
       setShowSearch(false);
       setMessageSearchQuery('');
     }
-  }, [selectedUser]);
+  }, [selectedUser, clearNotification]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -185,7 +185,7 @@ export default function LiveChatPage() {
         setLastReadMessageId(lastUnread.id);
       }
     }
-  }, [messages, selectedUser, user]);
+  }, [messages, selectedUser, user, lastReadMessageId]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

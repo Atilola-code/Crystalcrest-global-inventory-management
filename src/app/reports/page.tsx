@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { 
   TrendingUp, 
-  TrendingDown, 
   DollarSign, 
   Package, 
   Calendar,
@@ -12,7 +11,6 @@ import {
   Download,
   Filter,
   RefreshCw,
-  Clock,
   ShoppingCart,
   ArrowUpRight,
   ArrowDownRight

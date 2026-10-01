@@ -109,8 +109,8 @@ export default function UnsuppliedModal({
       resetForm();
       onUnsuppliedCreated();
       onClose();
-    } catch (err: any) {
-      showError(err.message || "Network error. Please try again.");
+    } catch (err: unknown) {
+      showError((err as Error).message || "Network error. Please try again.");
     } finally {
       setLoading(false);
     }

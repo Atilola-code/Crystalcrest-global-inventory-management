@@ -79,7 +79,7 @@ export default function DepositModal({ open, onClose, onDepositCompleted }: Depo
 
       if (response.ok) {
         try {
-          const data = JSON.parse(responseText);
+          // const data = JSON.parse(responseText);
           showSuccess("Cash deposit recorded successfully!");
           setFormData({ amount: "", depositor_name: "", bank_name: "" });
           onDepositCompleted();
@@ -99,9 +99,9 @@ export default function DepositModal({ open, onClose, onDepositCompleted }: Depo
           showError(`Failed to record deposit: ${response.status} ${response.statusText}`);
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Network error recording deposit:", error);
-      showError(`Network error: ${error.message || "Failed to connect to server"}`);
+      showError(`Network error: ${ (error as Error).message || "Failed to connect to server" }`);
     } finally {
       setLoading(false);
     }
@@ -158,7 +158,7 @@ export default function DepositModal({ open, onClose, onDepositCompleted }: Depo
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Depositor's Name
+              Depositor&apos;s Name
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

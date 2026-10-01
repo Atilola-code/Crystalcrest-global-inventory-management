@@ -65,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const data = await response.json();
       
-      console.log('✅ Login successful:', data);
+      console.log(' Login successful:', data);
       
       // Store tokens
       localStorage.setItem('access_token', data.access);

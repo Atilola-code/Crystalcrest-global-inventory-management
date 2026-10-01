@@ -1,4 +1,4 @@
-// src/app/purchase-orders/page.tsx - FIXED SCROLLING VERSION
+// src/app/purchase-orders/page.tsx 
 "use client";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
@@ -8,8 +8,8 @@ import CreatePOModal from "../components/purchaseOrders/CreatePOModal";
 import ViewPOModal from "../components/purchaseOrders/ViewPOModal";
 import { PurchaseOrder, Product, POStatistics } from "../types";
 import { showSuccess, showError } from "@/app/utils/toast";
-import { apiFetch, clearCacheByEndpoint, clearRelatedCaches } from "@/services/api";
-import { useFetchWithCache, useNetworkStatus } from "../hooks/useFetchWithCache";
+import { apiFetch, clearCacheByEndpoint } from "@/services/api";
+import { useFetchWithCache } from "../hooks/useFetchWithCache";
 import { useForceRefresh } from "../hooks/useForceRefresh";
 import { ErrorBoundary } from "../components/shared/ErrorBoundary";
 import PurchaseOrdersTable from "./PurchaseOrdersTable";
@@ -75,13 +75,13 @@ export default function PurchaseOrdersPage() {
   const [selectedPO, setSelectedPO] = useState<PurchaseOrder | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [currentPage, _setCurrentPage] = useState(1);
+  const [itemsPerPage, _setItemsPerPage] = useState(20);
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
-  const [totalPages, setTotalPages] = useState(1);
+  const [_totalPages, setTotalPages] = useState(1);
   
-  const isOnline = useNetworkStatus();
+  // const isOnline = useNetworkStatus();
   const forceRefresh = useForceRefresh();
 
   // Use custom hooks for data fetching
@@ -89,14 +89,14 @@ export default function PurchaseOrdersPage() {
     data: purchaseOrdersData,
     loading: poLoading, 
     fetchData: fetchPurchaseOrders,
-    invalidateCache: invalidatePOCache,
+    // invalidateCache: invalidatePOCache,
     setData: setPurchaseOrdersData
   } = useFetchWithCache<PurchaseOrdersResponse>('/api/purchase-orders/');
   
   const { 
     data: statisticsData, 
     fetchData: fetchStatistics,
-    invalidateCache: invalidateStatsCache 
+    // invalidateCache: invalidateStatsCache 
   } = useFetchWithCache<POStatistics>('/api/purchase-orders/statistics/');
 
   useEffect(() => {
@@ -177,7 +177,7 @@ export default function PurchaseOrdersPage() {
         params.append('status', filterStatus);
       }
       
-      const url = `/api/purchase-orders/?${params.toString()}`;
+      // const url = `/api/purchase-orders/?${params.toString()}`;
       const result = await fetchPurchaseOrders({
         method: 'GET',
         body: null

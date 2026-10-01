@@ -12,7 +12,7 @@ import DepositModal from "../components/salesComponent/DepositModal";
 import UnsuppliedModal from "../components/salesComponent/UnsuppliedModal";
 import StopSaleButton from "../components/salesComponent/StopSaleButton";
 import ToggleStatsCard from "../components/shared/ToggleStatsCard";
-import { Sale, Product, UserRole, Deposit } from "../types";
+import { Sale, UserRole, Deposit } from "../types";
 import {
   MoreVertical,
   Eye,
@@ -104,14 +104,14 @@ export default function SalesPage() {
   const displayDeposits: Deposit[] = showAllSales ? deposits : filterToday(deposits);
   const displayUnsupplied = showAllSales ? unsuppliedData : filterToday(unsuppliedData);
 
-  const filteredSales = displaySales.filter((sale) => {
-    if (!sale?.invoice_id) return false;
-    const q = query.toLowerCase();
-    return (
-      sale.invoice_id.toLowerCase().includes(q) ||
-      sale.customer_name?.toLowerCase().includes(q)
-    );
-  });
+  // const filteredSales = displaySales.filter((sale) => {
+  //   if (!sale?.invoice_id) return false;
+  //   const q = query.toLowerCase();
+  //   return (
+  //     sale.invoice_id.toLowerCase().includes(q) ||
+  //     sale.customer_name?.toLowerCase().includes(q)
+  //   );
+  // });
 
   // ─── Totals ───────────────────────────────────────────────────────────────
   const sum = (list: any[], key = "total_amount") =>
@@ -268,7 +268,7 @@ export default function SalesPage() {
                     <div className="flex items-center gap-2">
                       {!showAllSales && (
                         <div className="text-right mr-2">
-                          <p className="text-xs text-gray-500">Today's Total</p>
+                          <p className="text-xs text-gray-500">Today&apos;s Total</p>
                           <p className="text-xl font-bold text-green-700">
                             ₦{formatCurrency(totalAmount)}
                           </p>

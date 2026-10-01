@@ -11,11 +11,28 @@ type Props = {
 
 
 
+type SaleData = {
+  id?: string | number;
+  invoice_id?: string;
+  customer_name?: string;
+  payment_method?: string;
+  cashier_name?: string;
+  date?: string;
+  items?: { product_name?: string; product?: string; quantity?: number; unit_price?: number; subtotal?: number }[];
+  subtotal?: number;
+  discount_amount?: number;
+  vat_amount?: number;
+  total_amount?: number;
+  amount_paid?: number;
+  change_due?: number;
+  receipt_print_count?: number;
+};
+
 export default function ReceiptView({ saleId, onDone }: Props) {
-  const [saleData, setSaleData] = useState<any>(null);
+  const [saleData, setSaleData] = useState<SaleData | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasPrinted, setHasPrinted] = useState(false);
-  const [showPrintOptions, setShowPrintOptions] = useState(false);
+  const [_showPrintOptions, setShowPrintOptions] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -24,7 +41,7 @@ export default function ReceiptView({ saleId, onDone }: Props) {
     const fetchSale = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem("access_token");
+        // const token = localStorage.getItem("access_token");
         
         const res = await apiFetch(`/api/sales/?invoice_id=${saleId}`);
 
@@ -37,7 +54,7 @@ export default function ReceiptView({ saleId, onDone }: Props) {
           const allData = await allRes.json();
           // Find the sale with matching invoice_id
           const sale = Array.isArray(allData) 
-            ? allData.find((s: any) => s.invoice_id === saleId)
+            ? allData.find((s: { invoice_id: string }) => s.invoice_id === saleId)
             : allData;
           
           setSaleData(sale);
@@ -50,7 +67,7 @@ export default function ReceiptView({ saleId, onDone }: Props) {
         // Check if data is an array or single object
         if (Array.isArray(data) && data.length > 0) {
           // Find the specific sale
-          const sale = data.find((s: any) => s.invoice_id === saleId);
+          const sale = data.find((s: { invoice_id: string }) => s.invoice_id === saleId);
           setSaleData(sale);
           setHasPrinted(sale?.receipt_print_count && sale.receipt_print_count > 0);
         } else if (data && !Array.isArray(data)) {
@@ -74,7 +91,7 @@ export default function ReceiptView({ saleId, onDone }: Props) {
     // Track the print event
     if (!hasPrinted && saleData) {
       try {
-        const token = localStorage.getItem("access_token");
+        // const token = localStorage.getItem("access_token");
         
         // Increment receipt print count
         const res = await apiFetch(`/api/sales/${saleData.id}/increment-print-count/`, {
@@ -91,15 +108,15 @@ export default function ReceiptView({ saleId, onDone }: Props) {
     }
   };
 
-  const handlePrintToPrinter = () => {
-    window.print();
-    setShowPrintOptions(false);
-  };
+  // const handlePrintToPrinter = () => {
+  //   window.print();
+  //   setShowPrintOptions(false);
+  // };
 
-  const handleSaveAsPDF = () => {
-    window.print();
-    setShowPrintOptions(false);
-  };
+  // const handleSaveAsPDF = () => {
+  //   window.print();
+  //   setShowPrintOptions(false);
+  // };
 
   if (loading) {
     return (
@@ -193,13 +210,15 @@ export default function ReceiptView({ saleId, onDone }: Props) {
             <div className="text-right">
               <p className="text-gray-600">Date:</p>
               <p className="font-semibold">
-                {new Date(saleData.date).toLocaleString('en-US', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
+                {saleData.date
+                  ? new Date(saleData.date).toLocaleString('en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })
+                  : 'N/A'}
               </p>
             </div>
             {saleData.customer_name && (
@@ -259,18 +278,18 @@ export default function ReceiptView({ saleId, onDone }: Props) {
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Subtotal:</span>
               <span className="font-medium">
-                ₦{Number(saleData.subtotal).toLocaleString('en-NG', {
+                ₦{Number(saleData.subtotal ?? 0).toLocaleString('en-NG', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2
                 })}
               </span>
             </div>
             
-            {saleData.discount_amount > 1 && (
+            {(saleData?.discount_amount ?? 0) > 1 && (
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Discount:</span>
                 <span className="font-medium text-red-600">
-                  ₦{Number(saleData.discount_amount).toLocaleString('en-NG', {
+                  ₦{Number(saleData?.discount_amount ?? 0).toLocaleString('en-NG', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
                   })}
@@ -278,11 +297,11 @@ export default function ReceiptView({ saleId, onDone }: Props) {
               </div>
             )}
             
-            {saleData.vat_amount > 0 && (
+            {(saleData?.vat_amount ?? 0) > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">VAT:</span>
                 <span className="font-medium">
-                  ₦{Number(saleData.vat_amount).toLocaleString('en-NG', {
+                  ₦{Number(saleData?.vat_amount ?? 0).toLocaleString('en-NG', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
                   })}
@@ -293,7 +312,7 @@ export default function ReceiptView({ saleId, onDone }: Props) {
             <div className="flex justify-between text-lg font-bold border-t pt-2">
               <span>Total Amount:</span>
               <span>
-                ₦{Number(saleData.total_amount).toLocaleString('en-NG', {
+                ₦{Number(saleData.total_amount ?? 0).toLocaleString('en-NG', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2
                 })}
@@ -305,22 +324,22 @@ export default function ReceiptView({ saleId, onDone }: Props) {
               <span className="font-medium capitalize">{saleData.payment_method}</span>
             </div>
 
-            {saleData.amount_paid > 0 && (
+            {(saleData?.amount_paid ?? 0) > 0 && (
               <>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Amount Paid:</span>
                   <span className="font-medium">
-                    ₦{Number(saleData.amount_paid).toLocaleString('en-NG', {
+                    ₦{Number(saleData?.amount_paid ?? 0).toLocaleString('en-NG', {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2
                     })}
                   </span>
                 </div>
-                {saleData.change_due > 0 && (
+                {(saleData?.change_due ?? 0) > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Change:</span>
                     <span className="font-medium text-green-600">
-                      ₦{Number(saleData.change_due).toLocaleString('en-NG', {
+                      ₦{Number(saleData?.change_due ?? 0).toLocaleString('en-NG', {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2
                       })}

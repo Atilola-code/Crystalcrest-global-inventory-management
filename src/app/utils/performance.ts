@@ -4,7 +4,7 @@ export const measurePerformance = (name: string) => {
     end: () => {
       const end = performance.now();
       const duration = end - start;
-      console.log(`⏱️ ${name}: ${duration.toFixed(2)}ms`);
+      console.log(` ${name}: ${duration.toFixed(2)}ms`);
       if (duration > 100) {
         console.warn(`⚠️ Slow operation detected: ${name}`);
       }

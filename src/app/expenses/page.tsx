@@ -1,6 +1,6 @@
 // src/app/expenses/page.tsx - FIXED VERSION
 "use client";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Plus, Edit, Trash2, Eye, RefreshCw, Calendar, MoreVertical, FileText } from "lucide-react";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import Sidebar from "../components/layout/Sidebar";

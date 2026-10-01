@@ -19,7 +19,7 @@ export default function InventoryDashboardPage() {
   const { user } = useAuth();
   const [view, setView] = useState<DashboardView>("products");
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [_loading, setLoading] = useState(false);
   const [query, setQuery] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -58,7 +58,7 @@ export default function InventoryDashboardPage() {
   async function fetchProducts() {
     setLoading(true);
     try {
-      const res = await apiFetch('/api/inventory/');  // ← Use apiFetch
+      const res = await apiFetch('/api/inventory/'); 
 
       if (!res.ok) {
         const errorText = await res.text();
@@ -94,8 +94,8 @@ export default function InventoryDashboardPage() {
     showSuccess("User registered successfully!");
   };
 
-  function handleSaleCompleted(sale: any) {
-    setSelectedSaleId(sale.invoice_id || sale.id);
+  function handleSaleCompleted(sale: { invoice_id?: string; id: number }) {
+    setSelectedSaleId(String(sale.invoice_id ?? sale.id));
     setView("receipt");
     fetchProducts(); // refresh stock
   }
@@ -111,7 +111,7 @@ export default function InventoryDashboardPage() {
     }
 
     try {
-      const token = localStorage.getItem("access_token");
+     
       const res = await apiFetch(`/api/inventory/${productId}/`, {
         method: "DELETE",
       

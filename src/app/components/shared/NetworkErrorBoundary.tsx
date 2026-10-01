@@ -34,7 +34,7 @@ export default function NetworkErrorBoundary({ children }: { children: React.Rea
           <WifiOff className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Network Connection Lost</h2>
           <p className="text-gray-600 mb-6">
-            You're currently offline. Please check your internet connection.
+            You&apos;re currently offline. Please check your internet connection.
           </p>
           <button
             onClick={() => {

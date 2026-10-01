@@ -21,7 +21,7 @@ export function CacheProvider({ children }: { children: React.ReactNode }) {
       
       // Use low priority for warming
       if ('requestIdleCallback' in window) {
-        (window as any).requestIdleCallback(() => {
+        (window as { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(() => {
           endpoints.forEach(endpoint => {
             apiFetch(endpoint).catch(() => {}); // Silent fail
           });
@@ -39,7 +39,7 @@ export function CacheProvider({ children }: { children: React.ReactNode }) {
     
     // Set up periodic cache maintenance
     const maintenanceInterval = setInterval(() => {
-      const cache = (window as any).__apiCache;
+      const cache = (window as Window & typeof globalThis & { __apiCache?: Map<string, unknown> }).__apiCache;
       if (cache && cache.size > 100) {
         // Clean old cache entries
         console.log('Performing cache maintenance...');

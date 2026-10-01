@@ -199,7 +199,7 @@ export default function CreatePOModal({ open, onClose, products, onPOCreated }: 
 
     setLoading(true);
     try {
-      const token = localStorage.getItem("access_token");
+      // const token = localStorage.getItem("access_token");
       
       const payload = {
         supplier_name: formData.supplier_name,

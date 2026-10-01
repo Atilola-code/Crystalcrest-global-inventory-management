@@ -31,8 +31,8 @@ export default function SignupPage({onClose} : {onClose: () => void}) {
             await register(data);
             setSuccess(true);
             setTimeout(onClose, 2000);
-          } catch (err: any) {
-            setError(err.message || 'Registration failed');
+          } catch (err: unknown) {
+            setError((err as Error).message || 'Registration failed');
           } finally {
             setLoading(false);
         }

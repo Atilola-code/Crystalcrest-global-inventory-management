@@ -36,9 +36,9 @@ export function useFetchWithCache<T>(endpoint: string) {
       setData(result);
       setLastFetched(new Date());
       return result;
-    } catch (err: any) {
-      if (err.name !== 'AbortError') {
-        setError(err);
+    } catch (err: unknown) {
+      if ((err as Error).name !== 'AbortError') {
+        setError(err as Error);
         console.error(`Error fetching ${endpoint}:`, err);
       }
       throw err;

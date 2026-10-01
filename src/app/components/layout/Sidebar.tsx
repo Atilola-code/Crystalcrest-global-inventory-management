@@ -6,7 +6,6 @@ import {
   Package, 
   ShoppingCart, 
   Users, 
-  FileText, 
   Settings, 
   BarChart3, 
   Boxes, 
@@ -86,7 +85,7 @@ function ComingSoonModal({ isOpen, onClose, featureName }: {
             </h4>
             
             <p className="text-gray-600 mb-4">
-              We're currently working on this feature to bring you an even better experience.
+              We&apos;re currently working on this feature to bring you an even better experience.
             </p>
             
             <div className="bg-blue-50 rounded-lg p-4 mb-6">
@@ -95,7 +94,7 @@ function ComingSoonModal({ isOpen, onClose, featureName }: {
                 <span className="text-sm font-medium">Under Development</span>
               </div>
               <p className="text-xs text-blue-600 mt-1">
-                Expected launch: Q2 2026
+                Expected launch: Q4 2026
               </p>
             </div>
             
@@ -167,7 +166,7 @@ function LogoutModal({ isOpen, onClose, onConfirm }: {
                 Are you sure you want to log out?
               </p>
               <p className="text-sm text-gray-500">
-                You'll need to sign in again to access the inventory system.
+                You&apos;ll need to sign in again to access the inventory system.
               </p>
             </div>
           </div>
@@ -264,7 +263,7 @@ export default function Sidebar() {
     setComingSoonFeature("");
   };
 
-  // Don't show sidebar on login/signup pages
+
   if (pathname === '/login' || pathname === '/signup') {
     return null;
   }
@@ -281,7 +280,7 @@ export default function Sidebar() {
         </div>
         <nav className="flex-1 p-4 space-y-1">
           {links.map(({ name, href, icon: Icon, roles, viewableBy, showBadge, comingSoon }) => {
-            const hasAccess = user && roles.includes(user.role);
+            // const hasAccess = user && roles.includes(user.role);
             const canViewInSidebar = !viewableBy || (user && roles.includes(user.role));
             
             return (

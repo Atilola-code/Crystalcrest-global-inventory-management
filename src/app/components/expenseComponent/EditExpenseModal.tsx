@@ -63,6 +63,7 @@ export default function EditExpenseModal({ open, onClose, expense, onExpenseUpda
         showError(error.detail || "Failed to update expense");
       }
     } catch (error) {
+      console.error("Error updating expense:", error);
       showError("Error updating expense");
     } finally {
       setSubmitting(false);
@@ -196,7 +197,7 @@ export default function EditExpenseModal({ open, onClose, expense, onExpenseUpda
             Cancel
           </button>
           <button
-            onClick={(e: any) => handleSubmit(e)}
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleSubmit(e)}
             disabled={submitting}
             className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50"
           >
