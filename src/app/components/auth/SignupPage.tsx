@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react'
 
 export default function SignupPage({onClose} : {onClose: () => void}) {
-    const { register } = useAuth();
+    const { signup } = useAuth();
     const [data, setData] = useState({
         first_name: '',
         last_name: '', 
@@ -28,7 +28,7 @@ export default function SignupPage({onClose} : {onClose: () => void}) {
         }
         setLoading(true);
         try {
-            await register(data);
+            await signup(data);
             setSuccess(true);
             setTimeout(onClose, 2000);
           } catch (err: unknown) {
@@ -81,7 +81,7 @@ if (success) {
 
           <div>
             <label className="block text-sm font-medium mb-2">Role *</label>
-            <select value={data.role} onChange={(e) => setData({...data, role: e.target.value})} className="w-full px-4 py-2 border rounded-lg">
+            <select value={data.role} onChange={(e) => setData({...data, role: e.target.value as 'ADMIN' | 'MANAGER' | 'CASHIER' })} className="w-full px-4 py-2 border rounded-lg">
               <option value="CASHIER">Cashier</option>
               <option value="MANAGER">Manager</option>
               <option value="ADMIN">Admin</option>

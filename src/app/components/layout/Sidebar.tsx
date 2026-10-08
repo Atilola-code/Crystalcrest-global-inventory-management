@@ -272,9 +272,9 @@ export default function Sidebar() {
     <>
       <aside className="w-64 bg-white border-r border-gray-200 h-screen fixed left-0 top-0 flex flex-col z-40">
         <div className="flex items-center gap-3 p-6 border-b">
-          <div className="bg-blue-600 rounded-full w-10 h-10 flex items-center justify-center text-white font-bold">KO</div>
+          <div className="bg-blue-600 rounded-full w-10 h-10 flex items-center justify-center text-white font-bold">CC</div>
           <div>
-            <div className="font-bold text-xl">CrystalCrest Global</div>
+            <div className="font-bold text-md uppercase">CrystalCrest Global</div>
             <div className="text-xs text-gray-500">Inventory Management</div>
           </div>
         </div>

@@ -55,12 +55,7 @@ export default function DepositModal({ open, onClose, onDepositCompleted }: Depo
         return;
       }
 
-      console.log("Sending deposit request to:", '/api/sales/deposits/');
-      console.log("With data:", {
-        amount: parseFloat(formData.amount),
-        depositor_name: formData.depositor_name,
-        bank_name: formData.bank_name
-      });
+     
 
       const response = await apiFetch('/api/sales/deposits/', {
         method: "POST",  
@@ -68,14 +63,14 @@ export default function DepositModal({ open, onClose, onDepositCompleted }: Depo
           amount: parseFloat(formData.amount),
           depositor_name: formData.depositor_name,
           bank_name: formData.bank_name
-          // date and created_by will be auto-set by Django
+        
         })
       });
 
-      console.log("Deposit API Response:", response.status);
+      
 
       const responseText = await response.text();
-      console.log("Deposit API Response Text:", responseText);
+     
 
       if (response.ok) {
         try {

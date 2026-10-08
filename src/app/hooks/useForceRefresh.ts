@@ -19,7 +19,7 @@ export function useForceRefresh() {
     // Step 3: Execute all fetch functions in parallel
     try {
       await Promise.all(fetchFunctions.map(fn => fn()));
-      console.log(' Force refresh completed');
+      
       return true;
     } catch (error) {
       console.error(' Force refresh failed:', error);

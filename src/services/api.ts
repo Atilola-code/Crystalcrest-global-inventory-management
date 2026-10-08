@@ -6,7 +6,6 @@ export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://kasali-oloshe
 
 
 // CRITICAL FIX: Reduce cache duration
-const CACHE_DURATION = 10 * 1000; // 10 seconds instead of 5 minutes
 const CACHE_VERSION = 'v1';
 
 const cache = new Map<string, { data: any; timestamp: number; etag?: string }>();
@@ -77,7 +76,7 @@ export function clearRelatedCaches(endpoint: string) {
     }
   }
   
-  console.log(`🗑️ Cleared ${cleared} related cache entries for ${endpoint}`);
+
   return cleared;
 }
 
@@ -88,18 +87,6 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}, retr
   
   const cacheKey = `${CACHE_VERSION}:${endpoint}:${JSON.stringify(options)}`;
   
-  // Check cache for GET requests
-  if (isCacheable) {
-    const cached = cache.get(cacheKey);
-    
-    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-      console.log('✅ Cache hit:', endpoint);
-      return new Response(JSON.stringify(cached.data), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-  }
 
   const token = localStorage.getItem('access_token');
   const headers: Record<string, string> = {
@@ -153,7 +140,6 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}, retr
           timestamp: Date.now(),
           etag: etag || undefined
         });
-        console.log('💾 Cached response for:', endpoint);
       } catch (error) {
         console.error('Failed to cache response:', error);
       }
@@ -175,14 +161,12 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}, retr
     if (error.name === 'AbortError') {
       console.warn('Request timed out:', endpoint);
       if (retryCount < MAX_RETRIES) {
-        console.log(`Retrying request (${retryCount + 1}/${MAX_RETRIES})...`);
         return apiFetch(endpoint, options, retryCount + 1);
       }
       throw new Error('Network timeout. Please check your connection.');
     }
     
     if (retryCount < MAX_RETRIES) {
-      console.log(`Retrying request (${retryCount + 1}/${MAX_RETRIES}) due to network error...`);
       await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
       return apiFetch(endpoint, options, retryCount + 1);
     }
@@ -196,12 +180,12 @@ function triggerDashboardRefresh() {
   window.dispatchEvent(new CustomEvent('dashboardRefresh', {
     detail: { timestamp: Date.now() }
   }));
-  console.log('🔄 Dashboard refresh triggered');
+  
 }
 
 export function clearApiCache() {
   cache.clear();
-  console.log('🗑️ All cache cleared');
+
 }
 
 export function clearCacheByEndpoint(endpointPattern: string | RegExp) {
@@ -216,7 +200,7 @@ export function clearCacheByEndpoint(endpointPattern: string | RegExp) {
       cleared++;
     }
   }
-  console.log(`🗑️ Cleared ${cleared} cache entries for pattern: ${endpointPattern}`);
+
 }
 
 // ============================================================================

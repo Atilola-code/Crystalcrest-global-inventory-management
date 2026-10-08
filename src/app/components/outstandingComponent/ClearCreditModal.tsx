@@ -115,10 +115,6 @@ export default function ClearCreditModal({ open, onClose, credit, onCreditCleare
       });
 
       if (response.ok) {
-        console.log("Credit payment recorded successfully");
-        
-      
-      // Step 3: Trigger dashboard refresh to update cash-at-bank
         triggerDashboardRefresh();
 
         showSuccess("Credit payment recorded successfully!");

@@ -101,7 +101,7 @@ export default function PurchaseOrdersPage() {
 
   useEffect(() => {
     const handleDataRefresh = () => {
-      console.log('🔄 Received data refresh event');
+    
       handleRefresh();
     };
     
@@ -214,7 +214,7 @@ export default function PurchaseOrdersPage() {
 
   const handlePOCreated = async () => {
     try {
-      console.log('🔄 PO Created - Starting force refresh...');
+     
       
       clearCacheByEndpoint('/api/purchase-orders/');
       clearCacheByEndpoint('/api/inventory/');
@@ -233,9 +233,9 @@ export default function PurchaseOrdersPage() {
       showSuccess("Purchase order created successfully!");
       setCreateModalOpen(false);
       
-      console.log('✅ Force refresh completed');
+    
     } catch (error) {
-      console.error("❌ Error refreshing after PO creation:", error);
+      console.error(" Error refreshing after PO creation:", error);
       showError("PO created but failed to refresh list");
     }
   };
@@ -243,12 +243,7 @@ export default function PurchaseOrdersPage() {
   const handleChangeStatus = async (po: PurchaseOrder, newStatus: string) => {
     if (!purchaseOrdersData?.result) return;
 
-    console.log('🔧 DEBUG Status Change:', {
-      poId: po.id,
-      currentStatus: po.status,
-      newStatus: newStatus,
-      availableChanges: getAvailableStatusChanges(po.status)
-    });
+   
 
     const newStatusTyped = newStatus as PurchaseOrder['status'];
     
@@ -268,17 +263,9 @@ export default function PurchaseOrdersPage() {
         body: JSON.stringify({ status: newStatus })
       });
 
-      console.log('🔧 DEBUG Response:', {
-        ok: response.ok,
-        status: response.status,
-        statusText: response.statusText
-      });
+     
 
       if (response.ok) {
-        const responseData = await response.json();
-        console.log('🔧 DEBUG Response Data:', responseData);
-        
-        showSuccess(`Status changed to ${newStatus}`);
           
         await forceRefresh(
           ['/api/purchase-orders/', '/api/purchase-orders/statistics/'],
@@ -322,16 +309,7 @@ export default function PurchaseOrdersPage() {
     );
   }, [purchaseOrdersData, debouncedSearch]);
 
-  useEffect(() => {
-    console.log('📊 Purchase Orders Data:', {
-      loading: poLoading,
-      data: purchaseOrdersData,
-      resultArray: purchaseOrdersData?.result,
-      count: purchaseOrdersData?.count,
-      filtered: filteredPOs?.length,
-      statistics: statisticsData
-    });
-  }, [poLoading, purchaseOrdersData, filteredPOs, statisticsData]);
+
 
   return (
     <ProtectedRoute>

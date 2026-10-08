@@ -13,7 +13,8 @@ import {
   Download,
   RefreshCw,
   Printer,
-  History
+  History,
+  Trash2
 } from "lucide-react";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import Sidebar from "../components/layout/Sidebar";
@@ -25,6 +26,8 @@ import { showSuccess, showError } from "@/app/utils/toast";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { apiFetch } from "@/services/api";
+import { useDeleteConfirm } from "../hooks/useDeleteConfirm";
+import DeleteConfirmModal from "../components/shared/DeleteConfirmModal";
 
 
 type DailyCredits = {
@@ -38,7 +41,6 @@ type DailyCredits = {
 };
 
 export default function OutstandingPage() {
-  // const { user } = useAuth();
   const [query, setQuery] = useState("");
   const [dailyCredits, setDailyCredits] = useState<DailyCredits[]>([]);
   const [loading, setLoading] = useState(false);
@@ -54,8 +56,6 @@ export default function OutstandingPage() {
   const [syncingDashboard, setSyncingDashboard] = useState(false);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [selectedCreditForHistory, setSelectedCreditForHistory] = useState<Credit | null>(null);
-
-  // const userRole = user?.role as UserRole | null;
 
   const syncDashboardManually = async () => {
     setSyncingDashboard(true);
@@ -77,6 +77,13 @@ export default function OutstandingPage() {
     showSuccess("Credits refreshed successfully!");
   };
 
+  const deleteCredit = useDeleteConfirm<Credit>(async (credit) => {
+    const res = await apiFetch(`/api/sales/credits/${credit.id}/`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Failed to delete credit');
+    showSuccess('Credit deleted');
+    fetchCredits();
+  });
+
   useEffect(() => {
     fetchCredits();
   }, [filterStatus]);
@@ -90,12 +97,12 @@ export default function OutstandingPage() {
         url += `?status=${filterStatus}`;
       }
 
-      console.log('Fetching credits from:', url);
+      
 
       const res = await apiFetch(url)
       if (res.ok) {
         const data: Credit[] = await res.json();
-        console.log('Credits data received:', data);
+     
         
         // Calculate totals from ALL credits (not filtered by status)
         const allCreditsRes = await apiFetch('/api/sales/credits/')
@@ -397,13 +404,7 @@ export default function OutstandingPage() {
     });
   };
 
-  // Helper function to format numbers without currency symbol
-  // const formatNumber = (num: number) => {
-  //   return num.toLocaleString('en-NG', {
-  //     minimumFractionDigits: 0,
-  //     maximumFractionDigits: 0
-  //   });
-  // };
+ 
 
   
   const getStatusBadge = (status: string) => {
@@ -762,7 +763,7 @@ export default function OutstandingPage() {
                                       <MoreVertical className="w-4 h-4 text-gray-500" />
                                     </button>
                                     
-                                    {/* ✅ FIXED: Dropdown positioned outside with proper z-index */}
+                                    {/* Dropdown positioned outside with proper z-index */}
                                     {dropdownOpen === credit.id.toString() && (
                                       <>
                                         {/* Backdrop to close dropdown when clicking outside */}
@@ -845,6 +846,10 @@ export default function OutstandingPage() {
                                                 <div className="text-xs text-gray-500">Update status to partially paid</div>
                                               </div>
                                             </button>
+                                            <button onClick={() => { deleteCredit.ask(credit); setDropdownOpen(null); }}>
+                                            <Trash2 className="w-4 h-4 mr-3 text-red-500" />
+                                            Delete Credit
+                                          </button>
                                           </div>
                                         </div>
                                       </>
@@ -865,6 +870,14 @@ export default function OutstandingPage() {
         </div>
       </div>
 
+      <DeleteConfirmModal
+        open={deleteCredit.open}
+        itemName={deleteCredit.target?.invoice_id}
+        title="Delete Credit"
+        message="Deleting a credit will not restore the linked sale. Continue?"
+        onConfirm={deleteCredit.confirm}
+        onClose={deleteCredit.close}
+      />
       {/* Clear Credit Modal */}
       {selectedCreditForClear && (
         <ClearCreditModal

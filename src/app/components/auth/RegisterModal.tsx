@@ -44,8 +44,8 @@ export default function RegisterModal({ open, onClose, onSuccess }: Props) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold">Register New User</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
@@ -62,7 +62,7 @@ export default function RegisterModal({ open, onClose, onSuccess }: Props) {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium mb-1">First Name *</label>
+              <label className="block text-sm font-medium mb-1">First Name <span className="text-red-500">*</span></label>
               <input
                 {...register('first_name', { required: 'First name is required' })}
                 className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -70,7 +70,7 @@ export default function RegisterModal({ open, onClose, onSuccess }: Props) {
               {errors.first_name && <p className="text-red-500 text-xs mt-1">{errors.first_name.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Last Name *</label>
+              <label className="block text-sm font-medium mb-1">Last Name <span className="text-red-500">*</span></label>
               <input
                 {...register('last_name', { required: 'Last name is required' })}
                 className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -80,7 +80,7 @@ export default function RegisterModal({ open, onClose, onSuccess }: Props) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Email *</label>
+            <label className="block text-sm font-medium mb-1">Email <span className="text-red-500">*</span></label>
             <input
               type="email"
               {...register('email', { required: 'Email is required' })}
@@ -90,7 +90,7 @@ export default function RegisterModal({ open, onClose, onSuccess }: Props) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Password *</label>
+            <label className="block text-sm font-medium mb-1">Password <span className="text-red-500">*</span></label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -112,7 +112,7 @@ export default function RegisterModal({ open, onClose, onSuccess }: Props) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Confirm Password *</label>
+            <label className="block text-sm font-medium mb-1">Confirm Password <span className="text-red-500">*</span></label>
             <div className="relative">
               <input
                 type={showConfirmPassword ? "text" : "password"}
@@ -134,7 +134,7 @@ export default function RegisterModal({ open, onClose, onSuccess }: Props) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Role *</label>
+            <label className="block text-sm font-medium mb-1">Role <span className="text-red-500">*</span></label>
             <select
               {...register('role', { required: 'Role is required' })}
               className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

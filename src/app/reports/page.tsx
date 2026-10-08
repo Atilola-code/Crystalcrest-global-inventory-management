@@ -114,13 +114,13 @@ export default function ReportsPage() {
       if (salesRes.ok) {
         const data = await salesRes.json();
         salesData = Array.isArray(data) ? data : [];
-        console.log('📊 Sales data:', salesData.length, 'records');
+       
       }
       
       if (inventoryRes.ok) {
         const data = await inventoryRes.json();
         inventoryData = Array.isArray(data) ? data : [];
-        console.log('📋 Inventory:', inventoryData.length, 'products');
+     
       }
 
       if (purchaseRes.ok) {
@@ -133,7 +133,7 @@ export default function ReportsPage() {
       } else if (Array.isArray(data.purchase_orders)) {
         purchaseData = data.purchase_orders;
       }
-      console.log('🛒 Approved Purchases:', purchaseData.length, 'records');
+      
     }
 
     processReportData(salesData, inventoryData, purchaseData);
@@ -200,13 +200,7 @@ export default function ReportsPage() {
     
     const profit = totalSales - totalCost;
 
-    console.log('💰 Profit Calculation:', {
-      totalSales,
-      totalCost,
-      totalPurchases,
-      profit,
-      profitMargin: totalSales > 0 ? ((profit / totalSales) * 100).toFixed(2) + '%' : '0%'
-    });
+   
 
     const monthly = generateMonthlyData(salesData,purchaseData, productCostMap);
     const daily = generateDailySales(salesData);

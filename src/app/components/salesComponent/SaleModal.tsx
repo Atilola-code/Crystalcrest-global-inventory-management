@@ -193,7 +193,7 @@ export default function SalesModal({ open, onClose, products, onSaleCompleted, i
         items: saleItems
       };
 
-      console.log("📤 Submitting sale payload:", payload);
+   
 
       const res = await apiFetch('/api/sales/', {
         method: "POST",

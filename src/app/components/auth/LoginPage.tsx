@@ -3,9 +3,11 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react'
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage({onSuccess}: {onSuccess: () => void}) {
     const { login } = useAuth();
+    const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPwd, setShowPwd] = useState(false);
@@ -24,7 +26,10 @@ export default function LoginPage({onSuccess}: {onSuccess: () => void}) {
         setLoading(false);
         }
     };
+
+  
   return (
+    <>
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
         <div className="text-center mb-8">
@@ -79,7 +84,19 @@ export default function LoginPage({onSuccess}: {onSuccess: () => void}) {
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </div>
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-600">
+            Don&apos;t have an account?{' '}
+            <button
+              onClick={() => router.push('/signup')}
+              className="text-blue-600 hover:text-blue-800 font-medium"
+            >
+              Create a new account
+            </button>
+          </p>
+          </div>
       </div>
     </div>
+  </>
   )
 }

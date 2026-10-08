@@ -26,7 +26,7 @@ export default function ToggleStatsCard({
   bgColor,
   isCurrency = false,
   showEyeToggle = true,
-  responsive = false, // ✅ Added default value
+  responsive = false, 
   change = 0,
   changeLabel = "vs last month",
   showChange = false

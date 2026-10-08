@@ -165,30 +165,12 @@ export default function UserManagementPage() {
     fetchUsers();
   }, []);
 
-//   async function validateToken(): Promise<boolean> {
-//   const token = localStorage.getItem("access_token");
-//   if (!token) return false;
-  
-//   try {
-//     const res = await fetch(`${API_URL}/api/users/`, {
-//       headers: {
-//         "Authorization": `Bearer ${token}`,
-//         "Content-Type": "application/json"
-//       },
-//     });
-    
-//     // If we get anything other than 401, token is valid
-//     return res.status !== 401;
-//   } catch {
-//     return false;
-//   }
-// }
 
   async function fetchUsers() {
     setLoading(true);
     try {
       const token = localStorage.getItem("access_token");
-      console.log("Token:", token ? "Exists" : "Missing");
+     
 
       if (!token) {
         showError("You need to log in first");
@@ -196,13 +178,13 @@ export default function UserManagementPage() {
         return;
       }
 
-      console.log("Testing token...");
+     
 
       const res = await apiFetch('/api/users/', {
         
       });
 
-      console.log("Response status:", res.status);
+    
 
       if (res.status === 401) {
         // Token expired or invalid
@@ -294,7 +276,6 @@ export default function UserManagementPage() {
 
   async function handleEditUser(user: User) {
     // Implement edit functionality
-    console.log("Edit user:", user);
     setEditingUser(user);
     // You can open an edit modal here
     showSuccess(`Edit functionality for ${user.first_name} ${user.last_name} - Coming soon!`);

@@ -12,6 +12,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Product, DashboardView } from "@/app/types";
 import { showSuccess, showError } from "@/app/utils/toast";
 import { apiFetch } from "@/services/api";
+import DeleteConfirmModal from './shared/DeleteConfirmModal';
+import { useDeleteConfirm } from '@/app/hooks/useDeleteConfirm';
+
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -105,30 +108,20 @@ export default function InventoryDashboardPage() {
     setEditOpen(true);
   };
 
-  const handleDeleteProduct = async (productId: number) => {
-    if (!confirm("Are you sure you want to delete this product? This action cannot be undone.")) {
-      return;
-    }
-
+  const deleteProduct = useDeleteConfirm<Product>(async (product) => {
     try {
-     
-      const res = await apiFetch(`/api/inventory/${productId}/`, {
-        method: "DELETE",
-      
-      });
-
+      const res = await apiFetch(`/api/inventory/${product.id}/`, { method: 'DELETE' });
       if (!res.ok) {
-        throw new Error("Failed to delete product");
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Failed to delete product');
       }
-
-      // Remove product from local state
-      setProducts(products.filter(p => p.id !== productId));
-      showSuccess("Product deleted successfully!");
-    } catch (err) {
-      console.error(err);
-      showError("Failed to delete product");
+      setProducts((prev) => prev.filter((p) => p.id !== product.id));
+      showSuccess('Product deleted successfully!');
+    } catch (err: any) {
+      showError(err.message || 'Failed to delete product');
+      throw err;
     }
-  };
+  });
 
   return (
     <DashboardLayout query={query} setQuery={setQuery} setView={setView} view={view} onRegisterClick={() => setRegisterOpen(true)}>
@@ -141,7 +134,7 @@ export default function InventoryDashboardPage() {
             onAddProduct={() => setAddOpen(true)}
             onRecordSale={() => setSaleOpen(true)}
             onEditProduct={handleEditProduct}
-            onDeleteProduct={handleDeleteProduct}
+            onDeleteProduct={(p) => deleteProduct.ask(p)}
           />
           <AddProductModal
             open={addOpen}
@@ -192,7 +185,7 @@ export default function InventoryDashboardPage() {
             onAddProduct={() => setAddOpen(true)}
             onRecordSale={() => setSaleOpen(true)}
             onEditProduct={handleEditProduct}
-            onDeleteProduct={handleDeleteProduct}
+            onDeleteProduct={(p) => deleteProduct.ask(p)}
           />
           <SalesModal
             open={saleOpen}
@@ -202,6 +195,15 @@ export default function InventoryDashboardPage() {
             isSaleStopped={isSaleStopped}
             userRole={user?.role || null}
           />
+        <DeleteConfirmModal
+          open={deleteProduct.open}
+          itemName={deleteProduct.target?.name}
+          title="Delete Product"
+          message="This product will be permanently removed. If it's referenced by sales, deletion may be blocked."
+          onConfirm={deleteProduct.confirm}
+          onClose={deleteProduct.close}
+          loading={deleteProduct.loading}
+        />
         </div>
       )}
 
@@ -213,6 +215,7 @@ export default function InventoryDashboardPage() {
             setSelectedSaleId(null);
           }}
         />
+
       )}
     </DashboardLayout>
   );

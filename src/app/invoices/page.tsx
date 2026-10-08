@@ -95,7 +95,15 @@ export default function InvoicesPage() {
       map[label].totalAmount += Number(sale.total_amount) || 0;
     }
 
-    for (const dep of deposits as { id: string; depositor_name: string; bank_name: string; amount: number; date: string }[]) {
+    const depositRows = deposits as unknown as {
+      id: number | string;
+      depositor_name: string;
+      bank_name: string;
+      amount: number | string;
+      date: string;
+    }[];
+
+    for (const dep of depositRows) {
       const d = new Date(dep.date);
       const label = d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
       addEntry(label, d);

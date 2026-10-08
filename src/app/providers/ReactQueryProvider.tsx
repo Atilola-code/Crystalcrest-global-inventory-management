@@ -14,11 +14,17 @@ export default function ReactQueryProvider({
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 10_000,    
+            staleTime: 30_000,    
             gcTime: 5 * 60_000,     
             retry: 2,
-            refetchOnWindowFocus: true,
+            retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
+            refetchOnWindowFocus: false, 
+            refetchOnMount: false,       
+            refetchOnReconnect: true,
           },
+          mutations: {
+          retry: 0,
+        },
         },
       })
   );

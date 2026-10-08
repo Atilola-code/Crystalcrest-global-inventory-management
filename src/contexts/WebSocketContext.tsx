@@ -79,13 +79,12 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
       const wsBaseUrl = process.env.NEXT_PUBLIC_WS_URL || 'wss://kasali-oloshe.onrender.com';
       const wsUrl = `${wsBaseUrl.replace(/\/$/, '')}/ws/chat/?token=${encodeURIComponent(token)}`;
 
-      console.log('Connecting to WebSocket...');
 
       try {
         const ws = new WebSocket(wsUrl);
 
         ws.onopen = () => {
-          console.log('✅ WebSocket connected');
+         
           setIsConnected(true);
           reconnectAttemptsRef.current = 0;
           processedMessageIds.current.clear();
@@ -94,11 +93,11 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
         ws.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data);
-            console.log('📨 WebSocket message:', data.type);
+   
 
             switch (data.type) {
               case 'connection_established':
-                console.log('Connection established for user:', data.userId);
+              
                 break;
 
               case 'new_message':
@@ -138,7 +137,7 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
                 break;
 
               default:
-                console.log('Unknown message type:', data.type);
+           
             }
           } catch (error) {
             console.error('Error parsing WebSocket message:', error);
@@ -151,17 +150,13 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
         };
 
         ws.onclose = (event) => {
-          console.log('🔌 WebSocket disconnected', {
-            code: event.code,
-            reason: event.reason,
-            wasClean: event.wasClean
-          });
+         
           setIsConnected(false);
           wsRef.current = null;
 
           if (reconnectAttemptsRef.current < maxReconnectAttempts) {
             const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000);
-            console.log(`Reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current + 1}/${maxReconnectAttempts})...`);
+        
             
             reconnectTimeoutRef.current = setTimeout(() => {
               reconnectAttemptsRef.current += 1;
@@ -200,13 +195,13 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
       audio.volume = 0.5;
       audio.play().catch(err => console.log('Could not play notification sound:', err));
     } catch (error) {
-      console.log('Notification sound not available');
+ 
     }
   };
 
   const sendMessage = (receiverId: string, message: string, messageId: string) => {
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-      console.log('WebSocket not connected, message will be sent via HTTP only');
+    
       return;
     }
 

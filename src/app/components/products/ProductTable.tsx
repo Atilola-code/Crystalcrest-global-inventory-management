@@ -11,7 +11,7 @@ type Props = {
   onAddProduct: () => void;
   onRecordSale: () => void;
   onEditProduct?: (product: Product) => void;
-  onDeleteProduct?: (productId: number) => void;
+  onDeleteProduct: (product: Product) => void; 
 };
 
 export default function ProductTable({ products, query, setQuery, onAddProduct, onRecordSale, onEditProduct, onDeleteProduct }: Props) {
@@ -33,20 +33,12 @@ export default function ProductTable({ products, query, setQuery, onAddProduct, 
     setDropdownOpen(null);
     if (onEditProduct) {
       onEditProduct(product);
-    } else {
-      console.log("Edit product:", product);
-    }
+    } 
   }
 
-  const handleDelete = (productId: number, productName: string) => {
+  const handleDelete = (product: Product) => {
     setDropdownOpen(null);
-    if (onDeleteProduct) {
-      if (window.confirm(`Are you sure you want to delete product "${productName}"? This action cannot be undone.`)) {
-        onDeleteProduct(productId);
-      }
-    } else {
-      console.log("Delete product:", productId);
-    }
+    onDeleteProduct(product);
   };
 
   const toggleDropdown = (productId: number) => {
@@ -155,7 +147,7 @@ export default function ProductTable({ products, query, setQuery, onAddProduct, 
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleDelete(p.id, p.name);
+                            handleDelete(p);
                           }}
                           className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
                         >

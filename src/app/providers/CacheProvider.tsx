@@ -42,7 +42,7 @@ export function CacheProvider({ children }: { children: React.ReactNode }) {
       const cache = (window as Window & typeof globalThis & { __apiCache?: Map<string, unknown> }).__apiCache;
       if (cache && cache.size > 100) {
         // Clean old cache entries
-        console.log('Performing cache maintenance...');
+      
       }
     }, 5 * 60 * 1000); // Every 5 minutes
     

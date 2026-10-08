@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { showSuccess, showError, showInfo } from '@/app/utils/toast';
 import { User } from "@/app/types";
 import { apiFetch, API_URL } from '@/services/api';
+import { clearApiCache } from '@/services/api';
 
 interface AuthContextType {
   user: User | null;
@@ -11,6 +12,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   register: (userData: any) => Promise<any>;
+  signup: (userData: any) => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -49,12 +51,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      // ✅ FIXED: Use fetch directly for login (not apiFetch - no token yet)
+      //  Clear any stale cached data from a previous session BEFORE logging in
+      clearApiCache();
+
       const response = await fetch(`${API_URL}/api/users/login/`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
 
@@ -64,31 +66,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const data = await response.json();
-      
-      console.log(' Login successful:', data);
-      
-      // Store tokens
+
       localStorage.setItem('access_token', data.access);
       localStorage.setItem('refresh_token', data.refresh);
-      
-      // Store user role from response
-      if (data.user && data.user.role) {
-        localStorage.setItem('user_role', data.user.role);
-      }
-      
-      // Store full user info
+      if (data.user?.role) localStorage.setItem('user_role', data.user.role);
       localStorage.setItem('user', JSON.stringify(data.user));
-      
+
       setUser(data.user);
       showSuccess(`Welcome back, ${data.user.first_name}!`);
     } catch (error: any) {
-      console.error('❌ Login error:', error);
       showError(error.message || 'Login failed');
       throw error;
     }
   };
 
   const logout = () => {
+    // Clear cache + invalidate react-query
+    clearApiCache();
+
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('user');
@@ -97,35 +92,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     showInfo("Logged out successfully");
   };
 
-  const register = async (userData: any) => {
-    try {
-      // ✅ FIXED: Use apiFetch for register
-      const res = await apiFetch('/api/users/register/', {
-        method: 'POST',
-        body: JSON.stringify(userData),
-      });
-
-      if (!res.ok) {
-        const error = await res.json();
-        const errorMessage = error.detail || 
-                          error.message || 
-                          JSON.stringify(error) ||
-                          'Registration failed';
-        showError(errorMessage);
-        throw new Error(errorMessage);
-      }
-
-      const result = await res.json();
-      showSuccess(`User ${result.first_name} ${result.last_name} registered successfully!`);
-      return result;
-    } catch (error: any) {
-      console.error('❌ Registration error:', error);
-      throw error;
+  function extractErrorMessage(error: any): string {
+    if (!error) return '';
+    if (typeof error === 'string') return error;
+    if (error.detail) return String(error.detail);
+    if (error.email) return Array.isArray(error.email) ? error.email[0] : error.email;
+    if (error.password) return Array.isArray(error.password) ? error.password[0] : error.password;
+    // fallback: first key's first value
+    const firstKey = Object.keys(error)[0];
+    if (firstKey) {
+      const v = error[firstKey];
+      return Array.isArray(v) ? v[0] : String(v);
     }
+    return '';
+  }
+  const register = async (userData: any) => {
+    const res = await apiFetch('/api/users/register/', {
+      method: 'POST',
+      body: JSON.stringify(userData),
+    });
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      const msg = extractErrorMessage(error) || 'Registration failed';
+      showError(msg);
+      throw new Error(msg);
+    }
+    const result = await res.json();
+    showSuccess(`User ${result.first_name} ${result.last_name} registered successfully!`);
+    return result;
+  };
+
+  const signup = async (userData: any) => {
+    const res = await apiFetch('/api/users/signup/', {
+      method: 'POST',
+      body: JSON.stringify(userData),
+    });
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      const msg = extractErrorMessage(error) || 'Signup failed';
+      showError(msg);
+      throw new Error(msg);
+    }
+    const result = await res.json();
+    showSuccess(`Account created! Welcome, ${result.first_name}`);
+    return result;
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, register, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, register, signup, loading }}>
       {children}
     </AuthContext.Provider>
   );

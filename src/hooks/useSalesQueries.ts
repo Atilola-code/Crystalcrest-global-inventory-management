@@ -1,6 +1,18 @@
 // src/hooks/useSalesQueries.ts
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/services/api";
+import type { Sale, Deposit, Product, Credit } from "@/app/types";
+
+
+export type UnsuppliedRecord = {
+  id: number;
+  customer_name: string;
+  date: string;
+  status: 'pending' | 'supplied';
+  items: { product_name: string; quantity: number }[];
+  notes?: string;
+  supplied_by_name?: string;
+};
 
 // ─── Query Keys ───────────────────────────────────────────────────────────────
 export const queryKeys = {
@@ -15,7 +27,7 @@ export const queryKeys = {
 
 // ─── Sales ────────────────────────────────────────────────────────────────────
 export function useSales() {
-  return useQuery({
+  return useQuery<Sale[]>({
     queryKey: queryKeys.sales,
     queryFn: async () => {
       const res = await apiFetch("/api/sales/");
@@ -28,7 +40,7 @@ export function useSales() {
 
 // ─── Deposits ─────────────────────────────────────────────────────────────────
 export function useDeposits() {
-  return useQuery({
+  return useQuery<Deposit[]>({
     queryKey: queryKeys.deposits,
     queryFn: async () => {
       const res = await apiFetch("/api/sales/deposits/");
@@ -41,7 +53,7 @@ export function useDeposits() {
 
 // ─── Products ─────────────────────────────────────────────────────────────────
 export function useProducts() {
-  return useQuery({
+  return useQuery<Product[]>({
     queryKey: queryKeys.products,
     queryFn: async () => {
       const res = await apiFetch("/api/inventory/");
@@ -65,6 +77,32 @@ export function useUnsupplied(status?: string) {
       return res.json();
     },
     staleTime: 10_000,
+  });
+}
+
+// ─── Credits ──────────────────────────────────────────────────────────────────
+export function useCredits() {
+  return useQuery<Credit[]>({
+    queryKey: ["credits"],
+    queryFn: async () => {
+      const res = await apiFetch("/api/sales/credits/");
+      if (!res.ok) throw new Error("Failed to fetch credits");
+      return res.json();
+    },
+    staleTime: 30_000,
+  });
+}
+
+// ─── Expense statistics ───────────────────────────────────────────────────────
+export function useExpenseStatistics() {
+  return useQuery<{ total_expenses: number }>({
+    queryKey: ["expenses", "statistics"],
+    queryFn: async () => {
+      const res = await apiFetch("/api/expenses/statistics/");
+      if (!res.ok) throw new Error("Failed to fetch expense stats");
+      return res.json();
+    },
+    staleTime: 60_000,
   });
 }
 

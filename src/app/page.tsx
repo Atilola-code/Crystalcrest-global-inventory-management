@@ -1,6 +1,6 @@
-// src/app/page.tsx - FIXED Dashboard with Expense Deduction
+// src/app/page.tsx
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Sidebar from "./components/layout/Sidebar";
 import Topbar from "./components/layout/Topbar";
@@ -15,8 +15,10 @@ import {
   CreditCard,
   Building,
 } from "lucide-react";
+import { useSales, useProducts, useDeposits, useCredits, useExpenseStatistics } from "@/hooks/useSalesQueries";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/services/api";
-import { useFetchWithCache } from "./hooks/useFetchWithCache";
+import { Credit } from "./types";
 
 interface DashboardStats {
   totalSales: number;
@@ -30,50 +32,26 @@ interface DashboardStats {
 
 export default function DashboardPage() {
   const [query, setQuery] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [totalExpenses, setTotalExpenses] = useState(0);
+  const queryClient = useQueryClient();
   const [lastUpdated, setLastUpdated] = useState(new Date());
   const [refreshInterval, setRefreshInterval] = useState<number>(() => {
     if (typeof window !== 'undefined') {
-      const savedInterval = localStorage.getItem('dashboardRefreshInterval');
-      return savedInterval ? parseInt(savedInterval) : 600000;
+      const saved = localStorage.getItem('dashboardRefreshInterval');
+      return saved ? parseInt(saved) : 600000;
     }
     return 600000;
   });
 
-  // Use hooks for data fetching
-  const { data: salesData, fetchData: fetchSales } = useFetchWithCache<any[]>('/api/sales/');
-  const { data: inventoryData, fetchData: fetchInventory } = useFetchWithCache<any[]>('/api/inventory/');
-  const { data: depositsData, fetchData: fetchDeposits } = useFetchWithCache<any[]>('/api/sales/deposits/');
-  const { data: creditsData, fetchData: fetchCredits } = useFetchWithCache<any[]>('/api/sales/credits/');
-
-  // ✅ FIXED: Fetch expenses on mount and when dashboard refreshes
-  const fetchExpenses = async () => {
-    try {
-      const response = await apiFetch('/api/expenses/statistics/');
-      if (response.ok) {
-        const data = await response.json();
-        console.log('💰 Expenses fetched:', data.total_expenses);
-        setTotalExpenses(data.total_expenses || 0);
-      }
-    } catch (error) {
-      console.error("Error fetching expenses:", error);
-      setTotalExpenses(0);
-    }
-  };
-
-  useEffect(() => {
-    fetchExpenses();
+  // ─── React Query hooks ──────────────────────────────────────────────
+  const { data: salesData = [], isLoading: salesLoading, refetch: refetchSales } = useSales();
+  const { data: inventoryData = [], isLoading: invLoading, refetch: refetchInv } = useProducts();
+  const { data: depositsData = [], isLoading: depLoading, refetch: refetchDep } = useDeposits();
+  const { data: creditsData = [] } = useCredits();
+  const { data: expenseStats } = useExpenseStatistics();
     
-    // Listen for expense changes
-    const handleExpenseUpdate = () => {
-      console.log('🔄 Expense update detected, refreshing...');
-      fetchExpenses();
-    };
-    
-    window.addEventListener('dashboardRefresh', handleExpenseUpdate);
-    return () => window.removeEventListener('dashboardRefresh', handleExpenseUpdate);
-  }, []);
+
+  const totalExpenses = expenseStats?.total_expenses || 0;
+  const loading = salesLoading || invLoading || depLoading;
 
   // Save refresh interval
   useEffect(() => {
@@ -82,131 +60,100 @@ export default function DashboardPage() {
     }
   }, [refreshInterval]);
 
-  // Fetch dashboard data
-  const fetchDashboardData = async () => {
-    setLoading(true);
-    try {
-      // Fetch all data in parallel including expenses
-      await Promise.all([
-        fetchSales(),
-        fetchInventory(),
-        fetchDeposits(),
-        fetchCredits(),
-        fetchExpenses() // ✅ Include expenses in dashboard refresh
-      ]);
-    } catch (error) {
-      console.error("Error fetching dashboard data:", error);
-    } finally {
-      setLoading(false);
+  // Manual refresh
+  const handleManualRefresh = async () => {
+    await Promise.all([refetchSales(), refetchInv(), refetchDep()]);
+    queryClient.invalidateQueries({ queryKey: ['credits'] });
+    queryClient.invalidateQueries({ queryKey: ['expenses', 'statistics'] });
+    setLastUpdated(new Date());
+    showInfo("Dashboard updated");
+  };
+
+  // Listen for global refresh events
+  useEffect(() => {
+    const handler = () => {
+      queryClient.invalidateQueries();
       setLastUpdated(new Date());
-    }
-  };
-
-  useEffect(() => {
-    const handleDashboardRefresh = () => {
-      console.log('🔄 Dashboard refresh triggered');
-      fetchDashboardData();
     };
-    
-    window.addEventListener('dashboardRefresh', handleDashboardRefresh);
-    
-    return () => {
-      window.removeEventListener('dashboardRefresh', handleDashboardRefresh);
-    };
-  }, []);
+    window.addEventListener('dashboardRefresh', handler);
+    return () => window.removeEventListener('dashboardRefresh', handler);
+  }, [queryClient]);
 
-  // ✅ FIXED: Calculate total deposits
-  const totalDeposits = depositsData?.reduce((sum, deposit) => 
-    sum + (parseFloat(deposit.amount) || 0), 0
-  ) || 0;
-
-  // ✅ FIXED: Calculate digital sales (transfer + POS)
-  const totalDigitalSales = salesData?.filter(sale => 
-    sale.payment_method === 'transfer' || sale.payment_method === 'pos'
-  ).reduce((sum, sale) => sum + (parseFloat(sale.total_amount) || 0), 0) || 0;
-
-  // Calculate stats from fetched data
-  const stats: DashboardStats = {
-    totalSales: salesData?.reduce((sum, sale) => sum + (parseFloat(sale.total_amount) || 0), 0) || 0,
-    totalStockValue: inventoryData?.reduce((sum, product) => {
-      const costPrice = parseFloat(product.cost_price || product.cost_price) || 0;
-      const quantity = parseFloat(product.quantity || 0);
-      return sum + (costPrice * quantity);
-    }, 0) || 0,
-    totalInventoryValue: inventoryData?.reduce((sum, product) => {
-      const sellingPrice = parseFloat(product.selling_price || product.price) || 0;
-      const quantity = parseFloat(product.quantity || 0);
-      return sum + (sellingPrice * quantity);
-    }, 0) || 0,
-    outstandingPayments: creditsData?.reduce((sum, credit) => {
-      if (credit.status === 'pending' || credit.status === 'partially_paid') {
-        return sum + (parseFloat(credit.outstanding_amount) || 0);
-      }
-      return sum;
-    }, 0) || 0,
-    // ✅ FIXED: Cash at Bank = Total Deposits + Digital Sales - Total Expenses
-    cashAtBank: totalDeposits + totalDigitalSales - totalExpenses,
-    totalProducts: inventoryData?.length || 0,
-    totalItemsInStock: inventoryData?.reduce((sum, product) => sum + parseFloat(product.quantity || 0), 0) || 0,
-  };
-
-  // ✅ ADDED: Log calculation for debugging
   useEffect(() => {
-    console.log('📊 Cash at Bank Calculation:', {
-      totalDeposits,
-      totalDigitalSales,
-      totalExpenses,
-      cashAtBank: stats.cashAtBank
-    });
-  }, [totalDeposits, totalDigitalSales, totalExpenses]);
-
-  // Initial fetch and auto-refresh
-  useEffect(() => {
-    fetchDashboardData();
-    
-    const intervalId = setInterval(() => {
-      fetchDashboardData();
+    const id = setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: ['sales'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['deposits'] });
+      queryClient.invalidateQueries({ queryKey: ['credits'] });
+      queryClient.invalidateQueries({ queryKey: ['expenses', 'statistics'] });
+      setLastUpdated(new Date());
     }, refreshInterval);
-    
-    return () => clearInterval(intervalId);
-  }, [refreshInterval]);
+    return () => clearInterval(id);
+  }, [refreshInterval, queryClient]);
 
-  // Handle dashboard refresh event
-  useEffect(() => {
-    const handleDashboardRefresh = () => {
-      fetchDashboardData();
-      showInfo("Dashboard updated with latest data");
+  const stats = useMemo<DashboardStats>(() => {
+    const totalDeposits = depositsData.reduce(
+      (sum, d) => sum + (parseFloat(String(d.amount)) || 0),
+      0
+    );
+    const totalDigitalSales = salesData
+      .filter(
+        (s) => s.payment_method === "transfer" || s.payment_method === "pos"
+      )
+      .reduce(
+        (sum, s) => sum + (parseFloat(String(s.total_amount)) || 0),
+        0
+      );
+
+    return {
+      totalSales: salesData.reduce(
+        (sum, s) => sum + (parseFloat(String(s.total_amount)) || 0),
+        0
+      ),
+      totalStockValue: inventoryData.reduce(
+        (sum, p) =>
+          sum +
+          (parseFloat(String(p.cost_price)) || 0) *
+            (parseFloat(String(p.quantity)) || 0),
+        0
+      ),
+      totalInventoryValue: inventoryData.reduce(
+        (sum, p) =>
+          sum +
+          (parseFloat(String(p.selling_price)) || 0) *
+            (parseFloat(String(p.quantity)) || 0),
+        0
+      ),
+      outstandingPayments: creditsData.reduce((sum, c) => {
+        if (c.status === "pending" || c.status === "partially_paid") {
+          return sum + (parseFloat(String(c.outstanding_amount)) || 0);
+        }
+        return sum;
+      }, 0),
+      cashAtBank: totalDeposits + totalDigitalSales - totalExpenses,
+      totalProducts: inventoryData.length,
+      totalItemsInStock: inventoryData.reduce(
+        (sum, p) => sum + (parseFloat(String(p.quantity)) || 0),
+        0
+      ),
     };
+  }, [salesData, inventoryData, depositsData, creditsData, totalExpenses]);
 
-    window.addEventListener('dashboardRefresh', handleDashboardRefresh);
-    
-    return () => {
-      window.removeEventListener('dashboardRefresh', handleDashboardRefresh);
-    };
-  }, []);
-
-  const handleManualRefresh = () => {
-    fetchDashboardData();
-  };
-
-  // Formatting functions
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-NG', {
+  // Formatting
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat("en-NG", {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
-  };
 
-  const formatNumber = (num: number) => {
-    return new Intl.NumberFormat('en-US').format(num);
-  };
+  const formatNumber = (num: number) =>
+    new Intl.NumberFormat("en-US").format(num);
 
-  const formatDateTime = (date: Date) => {
-    return new Intl.DateTimeFormat('en-NG', {
-      dateStyle: 'medium',
-      timeStyle: 'short',
+  const formatDateTime = (date: Date) =>
+    new Intl.DateTimeFormat("en-NG", {
+      dateStyle: "medium",
+      timeStyle: "short",
     }).format(date);
-  };
 
   const formatIntervalDisplay = (intervalMs: number) => {
     const minutes = intervalMs / 60000;
@@ -217,6 +164,9 @@ export default function DashboardPage() {
     return `${minutes} minutes`;
   };
 
+
+
+
   // Cache warming on app start
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -225,7 +175,7 @@ export default function DashboardPage() {
           '/api/sales/?limit=10',
           '/api/inventory/?limit=20',
           '/api/purchase-orders/statistics/',
-          '/api/expenses/statistics/' // ✅ Include expenses in cache warming
+          '/api/expenses/statistics/'
         ];
         
         endpoints.forEach(endpoint => {
@@ -336,7 +286,7 @@ export default function DashboardPage() {
                       responsive={true}
                     />
 
-                    {/* ✅ FIXED: Cash at Bank now properly deducts expenses */}
+                    {/* Cash at Bank now properly deducts expenses */}
                     <ToggleStatsCard
                       title="Cash at Bank"
                       value={stats.cashAtBank}
@@ -409,7 +359,7 @@ export default function DashboardPage() {
                         </p>
                       </div>
                       <span className="font-semibold text-sm md:text-base ml-2">
-                        ₦{formatCurrency(parseFloat(sale.total_amount) || 0)}
+                        ₦{formatCurrency(Number(sale.total_amount))}
                       </span>
                     </div>
                   ))}

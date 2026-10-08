@@ -58,7 +58,7 @@ export default function AddProductModal({ open, onClose, onProductAdded, lastPro
 
   async function onSubmit(data: any) {
   try {
-    console.log("Submitting product:", data);
+  
     
     const res = await apiFetch('/api/inventory/', {
       method: "POST",
@@ -72,7 +72,7 @@ export default function AddProductModal({ open, onClose, onProductAdded, lastPro
       return;
     }
       const responseData = await res.json();
-      console.log("Response:", responseData);
+    
       
       await onProductAdded();
       reset();

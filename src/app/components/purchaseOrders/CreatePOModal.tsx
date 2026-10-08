@@ -96,7 +96,7 @@ export default function CreatePOModal({ open, onClose, products, onPOCreated }: 
 
   const handleProductSelect = (index: number, productId: number) => {
     const product = products.find(p => p.id === productId);
-    console.log('Selecting product:', { index, productId, product }); // Debug log
+   
   
     if (product) {
         // Create a new items array to properly update state
@@ -113,7 +113,7 @@ export default function CreatePOModal({ open, onClose, products, onPOCreated }: 
         setDropdownOpen(prev => ({ ...prev, [index]: false }));
         setSearchTerms(prev => ({ ...prev, [index]: "" }));
     
-        console.log('Updated item:', newItems[index]); // Debug log
+       
        }
     };
 
@@ -154,18 +154,6 @@ export default function CreatePOModal({ open, onClose, products, onPOCreated }: 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    console.log('Items array:', items);
-    console.log('Selected products:', selectedProducts);
-  
-  // Check each item
-    items.forEach((item, index) => {
-        console.log(`Item ${index}:`, {
-        product_id: item.product_id,
-        quantity: item.quantity,
-        unit_price: item.unit_price,
-        isValid: !(!item.product_id || item.quantity <= 0 || item.unit_price <= 0)
-        });
-    });
 
     if (!formData.supplier_name.trim()) {
       showError("Please enter supplier name");
@@ -190,7 +178,7 @@ export default function CreatePOModal({ open, onClose, products, onPOCreated }: 
         return false;
     });
   
-  console.log('hasInvalidItems:', hasInvalidItems);
+  
 
   if (hasInvalidItems) {
     showError("Please complete all product details");
@@ -199,7 +187,7 @@ export default function CreatePOModal({ open, onClose, products, onPOCreated }: 
 
     setLoading(true);
     try {
-      // const token = localStorage.getItem("access_token");
+    
       
       const payload = {
         supplier_name: formData.supplier_name,
@@ -486,19 +474,7 @@ export default function CreatePOModal({ open, onClose, products, onPOCreated }: 
 
         {/* Footer */}
         <div className="flex justify-end gap-3 p-6 border-t">
-         {/* Add this temporarily in your modal JSX */}
-         <button 
-            type="button" 
-            onClick={() => {
-              console.log('Current state:', { items, selectedProducts });
-              items.forEach((item, i) => {
-              console.log(`Item ${i}:`, item, 'Valid:', !(!item.product_id || item.quantity <= 0 || item.unit_price <= 0));
-              });
-            }}
-            className="px-4 py-2 bg-gray-200 rounded-xl"
-            >
-            Debug State
-           </button>
+         
           <button
             type="button"
             onClick={handleClose}

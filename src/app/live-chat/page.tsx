@@ -88,7 +88,7 @@ export default function LiveChatPage() {
     const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
     
     if (!AudioContextClass) {
-      console.log('Web Audio API not supported');
+      
       return;
     }
     
@@ -106,11 +106,11 @@ export default function LiveChatPage() {
     oscillator.start();
     setTimeout(() => {
       oscillator.stop();
-      // Optional: close the context to free resources
+     
       context.close();
     }, 200);
   } catch (e) {
-    console.log('Error playing beep sound:', e);
+
   }
 };
 

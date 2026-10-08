@@ -33,8 +33,7 @@ function checkAndResetDailySales() {
       
       // Show notification (you can use your toast system)
       if (window.localStorage.getItem('access_token')) {
-        // Only show if user is logged in
-        console.log('New day started - sales have been reset for today');
+  
       }
     }
   }
