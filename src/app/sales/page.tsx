@@ -323,7 +323,7 @@ export default function SalesPage() {
                   )}
 
                   {/* ── Stats Cards ── */}
-                  <div className="mb-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+                  <div className="mb-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     <ToggleStatsCard title="Total Sales" value={displaySales.length} subtitle="Transactions" icon={<Receipt className="text-blue-600" size={18} />} color="text-gray-900" bgColor="bg-blue-100" />
                     <ToggleStatsCard title="Total Amount" value={totalAmount} subtitle="All methods" icon={<DollarSign className="text-green-600" size={18} />} color="text-gray-900" bgColor="bg-green-100" isCurrency />
                     <ToggleStatsCard title="Cash" value={cashAmount} subtitle={`${cashSales.length} sales`} icon={<Banknote className="text-yellow-600" size={18} />} color="text-gray-900" bgColor="bg-yellow-100" isCurrency />
