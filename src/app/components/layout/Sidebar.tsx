@@ -11,12 +11,12 @@ import {
   Boxes, 
   Receipt, 
   LogOut, 
-  LockIcon, 
+  // LockIcon, 
   DollarSign, 
   BadgeDollarSign,
   X,
   AlertCircle,
-  MessagesSquare,
+  // MessagesSquare,
   Clock,
   Construction
 } from "lucide-react";
@@ -33,7 +33,7 @@ const links = [
   { name: "Reports", href: "/reports", icon: BarChart3, roles: ['ADMIN', 'MANAGER'] },
   { name: "Purchase Orders", href: "/purchase-orders", icon: Package, roles: ['ADMIN', 'MANAGER'] },
   { name: "User Management", href: "/users", icon: Users, roles: ['ADMIN', 'MANAGER']},
-  { name: "Live chat", href: "/live-chat", icon: MessagesSquare, roles: ['ADMIN', 'MANAGER', 'CASHIER'], showBadge: true },
+  // { name: "Live chat", href: "/live-chat", icon: MessagesSquare, roles: ['ADMIN', 'MANAGER', 'CASHIER'], showBadge: true },
   { name: "Invoices", href: "/invoices", icon: Receipt, roles: ['ADMIN', 'MANAGER', 'CASHIER'] },
   { name: "Tax Computation", href: "/tax", icon: BadgeDollarSign, roles: ['ADMIN', 'MANAGER'], comingSoon: true },
   { name: "Expense", href: "/expenses", icon: Settings, roles: ['ADMIN', 'MANAGER', 'CASHIER']},
@@ -199,7 +199,7 @@ export default function Sidebar() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showComingSoonModal, setShowComingSoonModal] = useState(false);
   const [comingSoonFeature, setComingSoonFeature] = useState("");
-  const [unreadCount, setUnreadCount] = useState(0);
+  // const [unreadCount, setUnreadCount] = useState(0);
 
   // Fetch unread message count
   useEffect(() => {
@@ -216,7 +216,7 @@ export default function Sidebar() {
     const response = await apiFetch('/api/chat/unread-count/');
     if (response.ok) {
       const data = await response.json();
-      setUnreadCount(data.count);
+      // setUnreadCount(data.count);
     }
   } catch (error) {
     console.error('Failed to fetch unread count:', error);
@@ -279,7 +279,7 @@ export default function Sidebar() {
           </div>
         </div>
         <nav className="flex-1 p-4 space-y-1">
-          {links.map(({ name, href, icon: Icon, roles, viewableBy, showBadge, comingSoon }) => {
+          {links.map(({ name, href, icon: Icon, roles, viewableBy, comingSoon }) => {
             // const hasAccess = user && roles.includes(user.role);
             const canViewInSidebar = !viewableBy || (user && roles.includes(user.role));
             
@@ -302,14 +302,14 @@ export default function Sidebar() {
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
+                {/* <div className="flex items-center gap-2">
                   {showBadge && unreadCount > 0 && (
                     <span className="bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                   )}
                   {!canViewInSidebar && <LockIcon className="h-4 w-4 text-gray-400" />}
-                </div>
+                </div> */}
               </button>
             );
           })}

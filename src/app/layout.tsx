@@ -7,7 +7,7 @@ import ReactQueryProvider from "./providers/ReactQueryProvider";
 import { useEffect } from "react";
 import { setupMidnightChecker } from "@/app/utils/dateUtils";
 import { CacheProvider } from './providers/CacheProvider';
-import { WebSocketProvider } from "@/contexts/WebSocketContext";
+// import { WebSocketProvider } from "@/contexts/WebSocketContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,10 +27,10 @@ export default function RootLayout({
         <ReactQueryProvider>
         <AuthProvider>
           <CacheProvider>
-          <WebSocketProvider>
+          {/* <WebSocketProvider> */}
           <ToastProvider />
           {children}
-          </WebSocketProvider>
+          {/* </WebSocketProvider> */}
           </CacheProvider>
         </AuthProvider>
         </ReactQueryProvider>

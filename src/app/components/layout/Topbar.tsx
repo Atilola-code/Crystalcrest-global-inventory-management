@@ -4,7 +4,7 @@ import { Search, Bell, UserPlus } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import MessageNotificationBadge from "../chat/MessageNotificationBadge";
+// import MessageNotificationBadge from "../chat/MessageNotificationBadge";
 
 type Props = {
   query: string;
@@ -27,7 +27,7 @@ export default function Topbar({ query, setQuery, onRegisterClick }: Props) {
       <header className="h-16 bg-white border-b flex items-center justify-between px-6 fixed left-0 right-0 top-0 z-50">
         <div className="flex items-center gap-3">
           <div className="bg-blue-600 rounded-full w-10 h-10 flex items-center justify-center text-white font-bold">
-            KO
+            CC
           </div>
           <span className="font-bold text-xl">CrystalCrest Global</span>
         </div>
@@ -78,7 +78,7 @@ export default function Topbar({ query, setQuery, onRegisterClick }: Props) {
         )}
 
         {/* Message Notification Badge */}
-        <MessageNotificationBadge />
+        {/* <MessageNotificationBadge /> */}
 
         {/* Notifications */}
         <button className="relative p-2 hover:bg-gray-100 rounded-lg transition">
