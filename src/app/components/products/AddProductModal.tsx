@@ -71,7 +71,7 @@ export default function AddProductModal({ open, onClose, onProductAdded, lastPro
       showError(`Failed to create product: ${res.status}`);
       return;
     }
-      const responseData = await res.json();
+      // const responseData = await res.json();
     
       
       await onProductAdded();

@@ -5,12 +5,11 @@ const TIMEOUT_MS = 15000;
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://kasali-oloshe.onrender.com';
 
 
-// CRITICAL FIX: Reduce cache duration
+
 const CACHE_VERSION = 'v1';
 
 const cache = new Map<string, { data: any; timestamp: number; etag?: string }>();
 
-// Helper to refresh token
 async function refreshAccessToken(): Promise<string | null> {
   try {
     const refreshToken = localStorage.getItem('refresh_token');
@@ -37,22 +36,24 @@ async function refreshAccessToken(): Promise<string | null> {
   }
 }
 
-// CRITICAL FIX: Clear related caches when data changes
 const CACHE_DEPENDENCIES: Record<string, string[]> = {
   '/api/sales/': [
     '/api/sales/',
     '/api/sales/credits/',
     '/api/sales/daily-report/',
-    '/api/inventory/', // Sales affect inventory
+    '/api/inventory/',
+    '/api/purchase-orders/cash-at-bank/',
   ],
   '/api/purchase-orders/': [
     '/api/purchase-orders/',
     '/api/purchase-orders/statistics/',
-    '/api/inventory/', // POs affect inventory when received
+    '/api/purchase-orders/cash-at-bank/',
+    '/api/inventory/', 
   ],
   '/api/sales/credits/': [
     '/api/sales/credits/',
     '/api/sales/',
+    '/api/purchase-orders/cash-at-bank/',
   ],
   '/api/inventory/': [
     '/api/inventory/',
@@ -60,6 +61,7 @@ const CACHE_DEPENDENCIES: Record<string, string[]> = {
   ],
   '/api/sales/deposits/': [
     '/api/sales/deposits/',
+    '/api/purchase-orders/cash-at-bank/',
   ],
 };
 
@@ -80,7 +82,7 @@ export function clearRelatedCaches(endpoint: string) {
   return cleared;
 }
 
-// Main API fetch function
+
 export async function apiFetch(endpoint: string, options: RequestInit = {}, retryCount = 0): Promise<Response> {
   const method = options.method || 'GET';
   const isCacheable = ['GET', 'HEAD'].includes(method.toUpperCase());
@@ -393,4 +395,26 @@ export async function getInventory() {
     throw new Error(`Failed to fetch inventory: ${response.status}`);
   }
   return response.json();
+}
+
+// CASH AT BANK
+export async function getCashAtBank() {
+  const response = await apiFetch('/api/purchase-orders/cash_at_bank/');
+  
+  if (!response.ok) {
+    throw new Error(`Failed to fetch cash at bank: ${response.status}`);
+  }
+  return response.json() as Promise<{
+    balance: number;
+    transactions: Array<{
+      id: number;
+      amount: number;
+      transaction_type: string;
+      transaction_type_display: string;
+      reference: string;
+      description: string;
+      created_at: string;
+      created_by: string | null;
+    }>;
+  }>;
 }

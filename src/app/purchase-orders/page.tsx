@@ -243,8 +243,6 @@ export default function PurchaseOrdersPage() {
   const handleChangeStatus = async (po: PurchaseOrder, newStatus: string) => {
     if (!purchaseOrdersData?.result) return;
 
-   
-
     const newStatusTyped = newStatus as PurchaseOrder['status'];
     
     const previousData = { ...purchaseOrdersData };
@@ -263,18 +261,29 @@ export default function PurchaseOrdersPage() {
         body: JSON.stringify({ status: newStatus })
       });
 
-     
-
       if (response.ok) {
+        const data = await response.json();
+        
+        // Show success message with cash deduction info
+        if (newStatus === 'received' && data.cash_deducted !== undefined) {
+          showSuccess(
+            `PO received! ₦${Number(data.cash_deducted).toLocaleString()} deducted from Cash at Bank. ` +
+            `New balance: ₦${Number(data.cash_at_bank_balance).toLocaleString()}`
+          );
           
+          // Trigger dashboard refresh to update Cash at Bank card
+          window.dispatchEvent(new CustomEvent('dashboardRefresh'));
+        } else {
+          showSuccess(`Status changed to ${newStatus}`);
+        }
+        
         await forceRefresh(
-          ['/api/purchase-orders/', '/api/purchase-orders/statistics/'],
-          [fetchFilteredPurchaseOrders, fetchStats]
+          ['/api/purchase-orders/', '/api/purchase-orders/statistics/', '/api/inventory/'],
+          [fetchFilteredPurchaseOrders, fetchStats, fetchProductsData]
         );
       } else {
         setPurchaseOrdersData(previousData);
         const errorData = await response.json();
-        console.error('🔧 DEBUG Error:', errorData);
         showError(errorData.error || "Failed to change status");
       }
     } catch (error) {
@@ -351,7 +360,7 @@ export default function PurchaseOrdersPage() {
                 />
               </div>
 
-              {/* ✅ Scrollable Table Section */}
+              {/*  Scrollable Table Section */}
               <div className="flex-1 px-6 pb-6 overflow-y-auto">
                 <PurchaseOrdersTable
                   purchaseOrders={filteredPOs}

@@ -185,12 +185,12 @@ const PurchaseOrdersTable: React.FC<PurchaseOrdersTableProps> = ({
                         </button>
                       )}
 
-                      {/* ✅ Divider if there are status changes available */}
+                      {/*  Divider if there are status changes available */}
                       {availableStatusChanges.length > 0 && (
                         <div className="border-t border-gray-200 my-1"></div>
                       )}
 
-                      {/* ✅ STATUS CHANGES - Show all available transitions */}
+                      {/*  STATUS CHANGES - Show all available transitions */}
                       {availableStatusChanges.map((status) => {
                         const statusInfo = getStatusChangeInfo(status);
                         const StatusIcon = statusInfo.icon;

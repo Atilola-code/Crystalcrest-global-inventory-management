@@ -215,7 +215,7 @@ export default function Sidebar() {
   try {
     const response = await apiFetch('/api/chat/unread-count/');
     if (response.ok) {
-      const data = await response.json();
+      // const data = await response.json();
       // setUnreadCount(data.count);
     }
   } catch (error) {

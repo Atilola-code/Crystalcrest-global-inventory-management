@@ -1,6 +1,6 @@
 // src/hooks/useSalesQueries.ts
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch } from "@/services/api";
+import { apiFetch, getCashAtBank } from "@/services/api";
 import type { Sale, Deposit, Product, Credit } from "@/app/types";
 
 
@@ -212,5 +212,14 @@ export function useCreateDeposit() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.deposits });
     },
+  });
+}
+
+export function useCashAtBank() {
+  return useQuery({
+    queryKey: ['cashAtBank'],
+    queryFn: getCashAtBank,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
   });
 }

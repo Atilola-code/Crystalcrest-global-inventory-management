@@ -15,10 +15,8 @@ import {
   CreditCard,
   Building,
 } from "lucide-react";
-import { useSales, useProducts, useDeposits, useCredits, useExpenseStatistics } from "@/hooks/useSalesQueries";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiFetch } from "@/services/api";
-import { Credit } from "./types";
+import { useSales, useProducts, useDeposits, useCredits, useExpenseStatistics, useCashAtBank } from "@/hooks/useSalesQueries";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface DashboardStats {
   totalSales: number;
@@ -33,6 +31,7 @@ interface DashboardStats {
 export default function DashboardPage() {
   const [query, setQuery] = useState("");
   const queryClient = useQueryClient();
+  const { data: cashAtBankData } = useCashAtBank();
   const [lastUpdated, setLastUpdated] = useState(new Date());
   const [refreshInterval, setRefreshInterval] = useState<number>(() => {
     if (typeof window !== 'undefined') {
@@ -92,18 +91,6 @@ export default function DashboardPage() {
   }, [refreshInterval, queryClient]);
 
   const stats = useMemo<DashboardStats>(() => {
-    const totalDeposits = depositsData.reduce(
-      (sum, d) => sum + (parseFloat(String(d.amount)) || 0),
-      0
-    );
-    const totalDigitalSales = salesData
-      .filter(
-        (s) => s.payment_method === "transfer" || s.payment_method === "pos"
-      )
-      .reduce(
-        (sum, s) => sum + (parseFloat(String(s.total_amount)) || 0),
-        0
-      );
 
     return {
       totalSales: salesData.reduce(
@@ -130,14 +117,14 @@ export default function DashboardPage() {
         }
         return sum;
       }, 0),
-      cashAtBank: totalDeposits + totalDigitalSales - totalExpenses,
+      cashAtBank: cashAtBankData?.balance ?? 0,
       totalProducts: inventoryData.length,
       totalItemsInStock: inventoryData.reduce(
         (sum, p) => sum + (parseFloat(String(p.quantity)) || 0),
         0
       ),
     };
-  }, [salesData, inventoryData, depositsData, creditsData, totalExpenses]);
+  }, [salesData, inventoryData, depositsData, creditsData, totalExpenses, cashAtBankData]);
 
   // Formatting
   const formatCurrency = (amount: number) =>
@@ -290,7 +277,7 @@ export default function DashboardPage() {
                     <ToggleStatsCard
                       title="Cash at Bank"
                       value={stats.cashAtBank}
-                      subtitle={`Deposits + Digital - Expenses (${formatCurrency(totalExpenses)})`}
+                      subtitle={`Deposits, Digital, Expenses and PO (${formatCurrency(totalExpenses)})`}
                       icon={<Building className="text-indigo-600" size={20} />}
                       color="text-gray-900"
                       bgColor="bg-indigo-100"
@@ -332,7 +319,7 @@ export default function DashboardPage() {
                 </p>
               </div>
 
-              {/* ✅ ADDED: Expense Breakdown Card */}
+              {/*  ADDED: Expense Breakdown Card */}
               {totalExpenses > 0 && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3 md:p-4 mb-4 md:mb-6">
                   <div className="flex items-start justify-between">

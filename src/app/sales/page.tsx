@@ -177,6 +177,8 @@ export default function SalesPage() {
     setView("receipt");
     queryClient.invalidateQueries({ queryKey: queryKeys.sales });
     queryClient.invalidateQueries({ queryKey: queryKeys.products });
+    queryClient.invalidateQueries({ queryKey: ['credits'] }); 
+    window.dispatchEvent(new CustomEvent('dashboardRefresh'));
   }
 
   function handleDepositCompleted() {
@@ -190,6 +192,11 @@ export default function SalesPage() {
   function handleSaleUpdated() {
     queryClient.invalidateQueries({ queryKey: queryKeys.sales });
     queryClient.invalidateQueries({ queryKey: queryKeys.products });
+    queryClient.invalidateQueries({ queryKey: ['credits'] });
+
+    // Trigger dashboard refresh so outstanding card updates
+    window.dispatchEvent(new CustomEvent('dashboardRefresh'));
+
     setEditModalOpen(false);
     setSelectedSaleForEdit(null);
   }
